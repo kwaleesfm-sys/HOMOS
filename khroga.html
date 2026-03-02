@@ -8,194 +8,20 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getDatabase, ref, set, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-
-        // إعدادات Firebase الخاصة بك
-        const firebaseConfig = {
-            apiKey: "AIzaSyALgJ0f-UQ1t14mWFGTELAL3kyGnBRkW8I",
-            authDomain: "hoooo-ce33f.firebaseapp.com",
-            databaseURL: "https://hoooo-ce33f-default-rtdb.firebaseio.com",
-            projectId: "hoooo-ce33f",
-            storageBucket: "hoooo-ce33f.firebasestorage.app",
-            messagingSenderId: "285253833101",
-            appId: "1:285253833101:web:7dc841d61e02238d002dc4"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
-        const auth = getAuth(app);
-
-        const adminEmail = "ahmedfouad01278837444@gmail.com";
-        let map; // متغير الخريطة
-        let markers = []; // قائمة الدبابيس على الخريطة
-        let allApprovedPlaces = []; // الأماكن المعتمدة
-
-        // --- تهيئة الخريطة على المحلة الكبرى ---
-        function initMap() {
-            // إحداثيات المحلة الكبرى التقريبية
-            map = L.map('map').setView([30.9706, 31.1669], 14); 
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '© OpenStreetMap'
-            }).addTo(map);
-        }
-
-        // --- مراقبة تسجيل الدخول ---
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                document.getElementById('authSection').style.display = 'none';
-                document.getElementById('mainContent').style.display = 'block';
-                
-                // تشغيل الخريطة بعد ظهور القسم
-                setTimeout(() => { if(!map) initMap(); loadApprovedPlaces(); }, 500);
-
-                // إظهار لوحة الأدمن
-                if(user.email === adminEmail) {
-                    document.getElementById('adminSection').style.display = 'block';
-                    loadPendingPlaces();
-                }
-            } else {
-                document.getElementById('authSection').style.display = 'block';
-                document.getElementById('mainContent').style.display = 'none';
-            }
-        });
-
-        // --- تحميل الأماكن المعتمدة لعرضها على الخريطة ---
-        function loadApprovedPlaces() {
-            const approvedRef = ref(db, 'approved_places');
-            onValue(approvedRef, (snapshot) => {
-                allApprovedPlaces = [];
-                snapshot.forEach(child => {
-                    allApprovedPlaces.push({ id: child.key, ...child.val() });
-                });
-                displayMarkers(allApprovedPlaces);
-            });
-        }
-
-        // --- عرض الدبابيس على الخريطة ---
-        function displayMarkers(placesList) {
-            // مسح الدبابيس القديمة
-            markers.forEach(m => map.removeLayer(m));
-            markers = [];
-
-            placesList.forEach(place => {
-                // افتراض إحداثيات (في التطبيق الحقيقي سنأخذ الإحداثيات من الفورمة)
-                // للتجربة هنحط دبابيس عشوائية قريبة من المركز
-                let lat = 30.9706 + (Math.random() - 0.5) * 0.02;
-                let lng = 31.1669 + (Math.random() - 0.5) * 0.02;
-
-                let marker = L.marker([lat, lng]).addTo(map);
-                marker.bindPopup(`
-                    <div style="text-align:center">
-                        <b>${place.name}</b><br>
-                        المنطقة: ${place.area}<br>
-                        النوع: ${place.category}<br>
-                        السعر: ${place.price} ج.م<br>
-                        <img src="${place.image}" width="100" style="border-radius:10px; margin-top:5px;">
-                    </div>
-                `);
-                markers.push(marker);
-            });
-        }
-
-        // --- الفلترة الذكية (الميزة 4) ---
-        window.applyFilters = () => {
-            const budgetInput = document.getElementById('budget').value;
-            const friendsInput = document.getElementById('friends').value;
-            const selectedArea = document.getElementById('filterArea').value;
-            const selectedCategory = document.getElementById('filterCategory').value;
-
-            let maxPrice = Infinity;
-            if(budgetInput && friendsInput) {
-                maxPrice = budgetInput / friendsInput;
-            }
-
-            const filteredPlaces = allApprovedPlaces.filter(place => {
-                const matchPrice = place.price <= maxPrice;
-                const matchArea = selectedArea === "الكل" || place.area === selectedArea;
-                const matchCategory = selectedCategory === "الكل" || place.category === selectedCategory;
-                return matchPrice && matchArea && matchCategory;
-            });
-
-            displayMarkers(filteredPlaces);
-            alert(`تم العثور على ${filteredPlaces.length} مكان مناسب لميزانيتك واختياراتك!`);
-        };
-
-        // --- إضافة مكان جديد (بتحويل الصورة لـ Base64) ---
-        window.encodeImage = (file) => {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = () => resolve(reader.result);
-                reader.readAsDataURL(file);
-            });
-        };
-
-        window.addNewPlace = async () => {
-            const name = document.getElementById('pName').value;
-            const area = document.getElementById('pArea').value; // المنطقة
-            const category = document.getElementById('pCategory').value; // النوع
-            const price = document.getElementById('pPrice').value;
-            const file = document.getElementById('pImage').files[0];
-            
-            if(!name || !file || !price) return alert("الرجاء إكمال جميع البيانات!");
-
-            const base64Img = await encodeImage(file);
-            const pendingRef = ref(db, 'pending_places');
-            
-            push(pendingRef, {
-                name, area, category, price: Number(price), image: base64Img, status: "waiting"
-            }).then(() => {
-                alert("تم الإرسال.. في انتظار موافقة الإدارة!");
-                document.getElementById('addForm').reset();
-            });
-        };
-
-        // --- لوحة الأدمن (موافقة / رفض) ---
-        function loadPendingPlaces() {
-            const pendingRef = ref(db, 'pending_places');
-            onValue(pendingRef, (snapshot) => {
-                const list = document.getElementById('adminList');
-                list.innerHTML = "";
-                snapshot.forEach(child => {
-                    const item = child.val();
-                    list.innerHTML += `
-                        <div class="card">
-                            <img src="${item.image}" width="80">
-                            <p>${item.name} - ${item.area} (${item.price} ج)</p>
-                            <button onclick="approvePlace('${child.key}', '${item.name}', '${item.area}', '${item.category}', ${item.price}, '${item.image}')">موافقة ✅</button>
-                            <button onclick="rejectPlace('${child.key}')" style="background:red">حذف ❌</button>
-                        </div>`;
-                });
-            });
-        }
-
-        window.approvePlace = (id, name, area, category, price, image) => {
-            // نقل المكان من المراجعة للمعتمد
-            set(ref(db, 'approved_places/' + id), { name, area, category, price, image });
-            remove(ref(db, 'pending_places/' + id));
-            alert("تمت الموافقة والمكان نزل على الخريطة!");
-        };
-
-        window.rejectPlace = (id) => {
-            remove(ref(db, 'pending_places/' + id));
-            alert("تم حذف الطلب.");
-        };
-
-    </script>
-
     <style>
+        /* التنسيق والتصميم (UI/UX) */
         body { background: #1a1a2e; color: white; font-family: 'Segoe UI', Tahoma, sans-serif; text-align: center; margin: 0; padding: 10px; }
-        h1 { color: #e94560; }
+        h1 { color: #e94560; margin-bottom: 5px;}
         .glass { background: rgba(255,255,255,0.1); padding: 20px; border-radius: 15px; max-width: 500px; margin: 20px auto; border: 1px solid rgba(255,255,255,0.2); }
-        input, select { width: 90%; padding: 10px; margin: 10px 0; border-radius: 8px; border: none; background: rgba(255,255,255,0.9); }
-        button { background: #e94560; color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 95%; margin-top: 10px;}
-        button:hover { background: #ff4d6d; }
+        input, select { width: 90%; padding: 10px; margin: 10px 0; border-radius: 8px; border: none; background: rgba(255,255,255,0.9); font-family: inherit; }
+        button { background: #e94560; color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 95%; margin-top: 10px; transition: 0.3s;}
+        button:hover { background: #ff4d6d; transform: scale(1.02); }
+        .toggle-text { color: #ffb703; cursor: pointer; margin-top: 15px; font-size: 14px; text-decoration: underline; }
         
         /* خريطة Leaflet */
-        #map { height: 350px; width: 100%; border-radius: 15px; margin-top: 20px; border: 2px solid #e94560; z-index: 1;}
+        #map { height: 350px; width: 100%; max-width: 600px; margin: 20px auto; border-radius: 15px; border: 2px solid #e94560; z-index: 1;}
         
+        /* كروت الأماكن في لوحة الإدارة */
         .card { border-bottom: 1px solid #444; padding: 15px; text-align: right; background: rgba(0,0,0,0.2); margin-bottom: 10px; border-radius: 10px;}
         #adminSection { display: none; background: #0f3460; padding: 20px; margin-top: 30px; border-radius: 15px; }
     </style>
@@ -203,12 +29,17 @@
 <body>
 
     <h1>محلّاوي لقطة 💎</h1>
+    <p style="color: #aaa; margin-top: 0;">دليلك الذكي لخروجات المحلة</p>
 
     <div id="authSection" class="glass">
-        <h3>تسجيل الدخول للتطبيق</h3>
-        <input type="email" id="email" placeholder="الايميل">
-        <input type="password" id="pass" placeholder="الباسورد">
-        <button onclick="login()">دخول سريع</button>
+        <h3 id="authTitle">تسجيل الدخول للتطبيق</h3>
+        <input type="email" id="email" placeholder="الإيميل">
+        <input type="password" id="pass" placeholder="الباسورد (6 أحرف على الأقل)">
+        
+        <button id="loginBtn" onclick="window.login()">دخول سريع</button>
+        <button id="signupBtn" onclick="window.signup()" style="display:none; background:#0f3460;">إنشاء حساب جديد</button>
+        
+        <p class="toggle-text" onclick="window.toggleAuthMode()" id="toggleText">ليس لديك حساب؟ إنشاء حساب جديد</p>
     </div>
 
     <div id="mainContent" style="display:none">
@@ -233,13 +64,15 @@
                 <option value="كافيه">كافيه</option>
                 <option value="بلايستيشن">بلايستيشن</option>
             </select>
-            <button onclick="applyFilters()">ابحث في الخريطة 🗺️</button>
+            <button onclick="window.applyFilters()">ابحث في الخريطة 🗺️</button>
         </div>
 
+        <p style="color: #ffb703; font-size: 14px; margin-bottom: -10px;">👇 اضغط على الخريطة لتحديد موقع المكان الجديد</p>
         <div id="map"></div>
 
-        <div id="addForm" class="glass" style="margin-top: 30px;">
-            <h3>➕ اقترح مكان جديد في المحلة</h3>
+        <div id="addForm" class="glass">
+            <h3>➕ اقترح مكان جديد</h3>
+            <p style="font-size: 12px; color: #aaa;">(تأكد من الضغط على موقع المكان في الخريطة بالأعلى أولاً)</p>
             <input type="text" id="pName" placeholder="اسم المكان">
             <select id="pArea">
                 <option value="المشحمة">المشحمة</option>
@@ -249,32 +82,235 @@
                 <option value="شارع البحر">شارع البحر</option>
             </select>
             <select id="pCategory">
-                <option value="مطعم">مطعم</option>
+                <option value="مطعم">مطعم / أكل</option>
                 <option value="كافيه">كافيه</option>
                 <option value="بلايستيشن">بلايستيشن</option>
             </select>
-            <input type="number" id="pPrice" placeholder="متوسط سعر الفرد">
+            <input type="number" id="pPrice" placeholder="متوسط سعر الفرد (جنيه)">
             <label style="display:block; margin-top:10px; text-align:right;">صورة المكان:</label>
             <input type="file" id="pImage" accept="image/*">
-            <button onclick="addNewPlace()" style="background:#0f3460;">إرسال للإدارة</button>
+            <button onclick="window.addNewPlace()" style="background:#0f3460;">إرسال للإدارة</button>
         </div>
     </div>
 
     <div id="adminSection">
         <h2 style="color:#ffb703;">👑 لوحة تحكم الإدارة</h2>
-        <p>طلبات الأماكن الجديدة:</p>
         <div id="adminList"></div>
     </div>
 
-    <script>
-        // دالة تسجيل الدخول البسيطة
-        function login() {
-            const e = document.getElementById('email').value;
-            const p = document.getElementById('pass').value;
-            const auth = window.firebaseAuth = window.firebaseAuth || "استخدم signInWithEmailAndPassword من Firebase هنا";
-            // للتجربة فقط: سنفترض أنك قمت بربط دالة Firebase Auth الخاصة بك هنا.
-            alert("يرجى دمج دالة signInWithEmailAndPassword الخاصة بـ Firebase مكان هذا التنبيه ليعمل تسجيل الدخول بشكل حقيقي.");
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, set, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyALgJ0f-UQ1t14mWFGTELAL3kyGnBRkW8I",
+            authDomain: "hoooo-ce33f.firebaseapp.com",
+            databaseURL: "https://hoooo-ce33f-default-rtdb.firebaseio.com",
+            projectId: "hoooo-ce33f",
+            storageBucket: "hoooo-ce33f.firebasestorage.app",
+            messagingSenderId: "285253833101",
+            appId: "1:285253833101:web:7dc841d61e02238d002dc4"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const auth = getAuth(app);
+
+        const adminEmail = "ahmedfouad01278837444@gmail.com";
+        let map; 
+        let markers = []; 
+        let allApprovedPlaces = []; 
+        
+        // متغيرات حفظ مكان الدبوس الجديد
+        let selectedLat = null;
+        let selectedLng = null;
+        let selectionMarker = null;
+
+        // --- التبديل بين تسجيل الدخول وإنشاء حساب ---
+        let isLoginMode = true;
+        window.toggleAuthMode = () => {
+            isLoginMode = !isLoginMode;
+            document.getElementById('authTitle').innerText = isLoginMode ? "تسجيل الدخول للتطبيق" : "إنشاء حساب جديد";
+            document.getElementById('loginBtn').style.display = isLoginMode ? "inline-block" : "none";
+            document.getElementById('signupBtn').style.display = isLoginMode ? "none" : "inline-block";
+            document.getElementById('toggleText').innerText = isLoginMode ? "ليس لديك حساب؟ إنشاء حساب جديد" : "لديك حساب بالفعل؟ تسجيل الدخول";
+        };
+
+        // --- إنشاء حساب جديد ---
+        window.signup = () => {
+            const email = document.getElementById('email').value;
+            const pass = document.getElementById('pass').value;
+            if (!email || !pass) return alert("يرجى كتابة الإيميل والباسورد!");
+            
+            createUserWithEmailAndPassword(auth, email, pass)
+                .then(() => alert("تم إنشاء الحساب بنجاح! جارٍ الدخول..."))
+                .catch(error => alert("خطأ: " + error.message));
+        };
+
+        // --- تسجيل الدخول ---
+        window.login = () => {
+            const email = document.getElementById('email').value;
+            const pass = document.getElementById('pass').value;
+            if (!email || !pass) return alert("يرجى كتابة الإيميل والباسورد!");
+
+            signInWithEmailAndPassword(auth, email, pass)
+                .catch(error => alert("تأكد من البيانات: " + error.message));
+        };
+
+        // --- مراقبة المستخدم وفتح الخريطة ---
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                document.getElementById('authSection').style.display = 'none';
+                document.getElementById('mainContent').style.display = 'block';
+                
+                setTimeout(() => { 
+                    if(!map) initMap(); 
+                    loadApprovedPlaces(); 
+                }, 500);
+
+                if(user.email === adminEmail) {
+                    document.getElementById('adminSection').style.display = 'block';
+                    loadPendingPlaces();
+                }
+            }
+        });
+
+        // --- تهيئة الخريطة وتحديد الإحداثيات ---
+        function initMap() {
+            map = L.map('map').setView([30.9706, 31.1669], 14); 
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap'
+            }).addTo(map);
+
+            // السماح للمستخدم بتحديد موقع على الخريطة بالضغط عليها
+            map.on('click', function(e) {
+                selectedLat = e.latlng.lat;
+                selectedLng = e.latlng.lng;
+                
+                if(selectionMarker) map.removeLayer(selectionMarker);
+                
+                // إضافة دبوس أزرق مميز للمكان الجديد
+                selectionMarker = L.marker([selectedLat, selectedLng]).addTo(map);
+                selectionMarker.bindPopup("<b>الموقع المحدد للمكان الجديد</b>").openPopup();
+                
+                alert("تم تحديد إحداثيات المكان بنجاح! أكمل كتابة بياناته في الأسفل.");
+            });
         }
+
+        // --- جلب الأماكن المعتمدة بالخريطة الحقيقية ---
+        function loadApprovedPlaces() {
+            onValue(ref(db, 'approved_places'), (snapshot) => {
+                allApprovedPlaces = [];
+                snapshot.forEach(child => allApprovedPlaces.push({ id: child.key, ...child.val() }));
+                displayMarkers(allApprovedPlaces);
+            });
+        }
+
+        function displayMarkers(placesList) {
+            markers.forEach(m => map.removeLayer(m));
+            markers = [];
+
+            placesList.forEach(place => {
+                // استخدام الإحداثيات الحقيقية المحفوظة في الداتا بيز
+                let lat = place.lat || 30.9706;
+                let lng = place.lng || 31.1669;
+
+                let marker = L.marker([lat, lng]).addTo(map);
+                marker.bindPopup(`
+                    <div style="text-align:center; color: black;">
+                        <b>${place.name}</b><br>
+                        المنطقة: ${place.area}<br>
+                        النوع: ${place.category}<br>
+                        السعر: ${place.price} ج.م<br>
+                        <img src="${place.image}" width="100" style="border-radius:10px; margin-top:5px; max-height: 100px; object-fit: cover;">
+                        <br><br>
+                        <a href="https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}" target="_blank" style="background:#e94560; color:white; padding:5px 10px; text-decoration:none; border-radius:5px;">اتجاهات جوجل مابس</a>
+                    </div>
+                `);
+                markers.push(marker);
+            });
+        }
+
+        // --- نظام الفلترة الذكي ---
+        window.applyFilters = () => {
+            const b = document.getElementById('budget').value;
+            const f = document.getElementById('friends').value;
+            const a = document.getElementById('filterArea').value;
+            const c = document.getElementById('filterCategory').value;
+
+            let maxP = (b && f) ? (b / f) : Infinity;
+
+            const filtered = allApprovedPlaces.filter(p => 
+                (p.price <= maxP) && 
+                (a === "الكل" || p.area === a) && 
+                (c === "الكل" || p.category === c)
+            );
+            displayMarkers(filtered);
+        };
+
+        // --- إضافة مكان جديد مع الإحداثيات ---
+        window.encodeImage = file => new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.readAsDataURL(file);
+        });
+
+        window.addNewPlace = async () => {
+            const name = document.getElementById('pName').value;
+            const area = document.getElementById('pArea').value;
+            const category = document.getElementById('pCategory').value;
+            const price = document.getElementById('pPrice').value;
+            const file = document.getElementById('pImage').files[0];
+            
+            if(!name || !file || !price) return alert("الرجاء إكمال البيانات والصورة!");
+            if(!selectedLat || !selectedLng) return alert("لم تقم بتحديد موقع المكان! برجاء الضغط على موقعه في الخريطة بالأعلى أولاً.");
+
+            const base64Img = await encodeImage(file);
+            
+            push(ref(db, 'pending_places'), {
+                name, area, category, price: Number(price), image: base64Img, lat: selectedLat, lng: selectedLng
+            }).then(() => {
+                alert("تم إرسال المكان بنجاح! في انتظار المراجعة.");
+                document.getElementById('addForm').reset();
+                if(selectionMarker) map.removeLayer(selectionMarker);
+                selectedLat = null; selectedLng = null;
+            });
+        };
+
+        // --- لوحة تحكم الأدمن ---
+        function loadPendingPlaces() {
+            onValue(ref(db, 'pending_places'), (snapshot) => {
+                const list = document.getElementById('adminList');
+                list.innerHTML = "";
+                snapshot.forEach(child => {
+                    const item = child.val();
+                    // استخدام الإحداثيات هنا لنقلها عند الموافقة
+                    const args = `'${child.key}', '${item.name}', '${item.area}', '${item.category}', ${item.price}, '${item.image}', ${item.lat}, ${item.lng}`;
+                    
+                    list.innerHTML += `
+                        <div class="card">
+                            <img src="${item.image}" width="100" style="max-height: 100px; object-fit: cover;"><br>
+                            <b>${item.name}</b> - ${item.area} (${item.price} ج)<br>
+                            <small>${item.category}</small><br>
+                            <button onclick="window.approvePlace(${args})" style="background:green; width:45%; display:inline-block;">موافقة ✅</button>
+                            <button onclick="window.rejectPlace('${child.key}')" style="background:red; width:45%; display:inline-block;">حذف ❌</button>
+                        </div>`;
+                });
+            });
+        }
+
+        window.approvePlace = (id, name, area, category, price, image, lat, lng) => {
+            set(ref(db, 'approved_places/' + id), { name, area, category, price, image, lat, lng })
+                .then(() => remove(ref(db, 'pending_places/' + id)))
+                .then(() => alert("تمت الموافقة والمكان نزل على الخريطة!"));
+        };
+
+        window.rejectPlace = id => {
+            if(confirm("هل أنت متأكد من رفض المكان؟")) {
+                remove(ref(db, 'pending_places/' + id));
+            }
+        };
     </script>
 </body>
 </html>
