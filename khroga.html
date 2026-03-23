@@ -3,56 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HOMOS Studio | النسخة النهائية المستقرة</title>
+    <title>HOMOS Studio | المحرك فائق القوة</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        .homos-loader {
-            width: 48px; height: 48px;
-            border: 5px solid #FFF; border-bottom-color: #a78bfa;
-            border-radius: 50%; display: inline-block;
-            animation: rotation 1s linear infinite;
+        .homos-spinner {
+            width: 50px; height: 50px;
+            border: 5px solid rgba(167, 139, 250, 0.2);
+            border-top-color: #a78bfa;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
         }
-        @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .glow-effect { box-shadow: 0 0 30px rgba(167, 139, 250, 0.2); }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .glow { box-shadow: 0 0 40px -10px rgba(167, 139, 250, 0.3); }
     </style>
 </head>
-<body class="bg-[#020617] text-slate-100 min-h-screen font-sans selection:bg-violet-500">
+<body class="bg-[#030712] text-slate-100 min-h-screen font-sans selection:bg-violet-500">
 
-    <nav class="border-b border-white/5 bg-black/40 backdrop-blur-md p-4 sticky top-0 z-50">
+    <nav class="border-b border-white/5 bg-black/40 backdrop-blur-md p-5 sticky top-0 z-50">
         <div class="max-w-4xl mx-auto flex justify-between items-center">
-            <h1 class="text-2xl font-black bg-gradient-to-r from-violet-400 to-cyan-400 bg-clip-text text-transparent">HOMOS.Studio</h1>
-            <span class="text-[10px] bg-violet-500/20 text-violet-300 px-2 py-1 rounded border border-violet-500/30 font-mono tracking-tighter">STABLE_MODE_ON</span>
+            <h1 class="text-2xl font-black bg-gradient-to-r from-violet-400 to-cyan-400 bg-clip-text text-transparent italic">HOMOS STUDIO</h1>
+            <span class="text-[10px] bg-green-500/20 text-green-400 px-3 py-1 rounded-full border border-green-500/30 font-mono tracking-widest">SERVER_ACTIVE</span>
         </div>
     </nav>
 
-    <main class="max-w-2xl mx-auto px-6 py-12">
-        <div class="bg-[#0f172a] rounded-3xl p-8 border border-white/5 shadow-2xl glow-effect">
-            <div class="space-y-5">
+    <main class="max-w-xl mx-auto px-6 py-12">
+        <div class="bg-[#0f172a] rounded-[2.5rem] p-8 border border-white/5 shadow-2xl glow">
+            <div class="space-y-6">
                 <textarea id="promptInput" rows="3" 
-                    class="w-full bg-[#020617] border border-white/10 rounded-2xl p-4 text-lg outline-none focus:border-violet-500 transition-all placeholder-slate-600"
-                    placeholder="اكتب وصف الصورة بالإنجليزية (مثلاً: Cyberpunk Egypt 2077)"></textarea>
+                    class="w-full bg-[#030712] border border-white/10 rounded-2xl p-5 text-lg outline-none focus:border-violet-500 transition-all placeholder-slate-600 shadow-inner"
+                    placeholder="اكتب وصف الصورة (مثلاً: Futuristic Egyptian Pharaoh in 2077)"></textarea>
                 
-                <button onclick="startGeneration()" id="mainBtn"
-                    class="w-full bg-gradient-to-r from-violet-600 to-cyan-600 hover:from-violet-500 hover:to-cyan-500 py-4 rounded-2xl font-bold text-lg shadow-lg transition-all active:scale-95">
-                    توليد الصورة الآن
+                <button onclick="generate()" id="genBtn"
+                    class="w-full bg-white text-black font-black py-5 rounded-2xl text-xl hover:bg-violet-400 hover:scale-[1.02] active:scale-95 transition-all shadow-xl shadow-violet-500/10">
+                    ارسم الآن بقوة HOMOS
                 </button>
             </div>
 
-            <div id="resultArea" class="mt-10 hidden text-center">
-                <div id="loaderBox" class="py-10 bg-black/20 rounded-2xl mb-4">
-                    <span class="homos-loader"></span>
-                    <p class="mt-4 text-violet-400 animate-pulse text-sm">HOMOS Studio يقوم برسم خيالك... يرجى الانتظار</p>
+            <div id="statusArea" class="mt-12 hidden text-center space-y-6">
+                <div id="loader" class="flex flex-col items-center gap-4 py-10">
+                    <div class="homos-spinner"></div>
+                    <p class="text-violet-400 font-bold animate-pulse">جاري سحب البيانات من السحاب... يرجى الانتظار</p>
                 </div>
                 
-                <div class="relative group">
-                    <img id="resultImg" src="" 
-                        class="hidden w-full rounded-2xl border-2 border-white/5 shadow-2xl" 
-                        onload="onImageLoad()" 
-                        onerror="onImageError()">
-                    
-                    <div id="actionButtons" class="hidden mt-6 flex gap-3">
-                        <button onclick="downloadImage()" class="flex-1 bg-white/10 hover:bg-white/20 py-3 rounded-xl text-sm border border-white/10">حفظ الصورة</button>
-                        <button onclick="location.reload()" class="px-6 bg-red-500/10 text-red-400 py-3 rounded-xl text-sm border border-red-500/20">مسح</button>
+                <div id="imgContainer" class="hidden animate-in fade-in duration-700">
+                    <img id="outputImg" class="w-full rounded-3xl border-4 border-black shadow-2xl overflow-hidden shadow-violet-500/20">
+                    <div class="mt-8 grid grid-cols-2 gap-4">
+                        <button onclick="download()" class="bg-violet-600 hover:bg-violet-500 py-4 rounded-2xl font-bold text-sm">حفظ في الجهاز</button>
+                        <button onclick="location.reload()" class="bg-slate-800 hover:bg-slate-700 py-4 rounded-2xl font-bold text-sm">محاولة أخرى</button>
                     </div>
                 </div>
             </div>
@@ -60,59 +57,61 @@
     </main>
 
     <script>
-        function startGeneration() {
+        async function generate() {
             const prompt = document.getElementById('promptInput').value.trim();
-            if (!prompt) return alert("يرجى كتابة وصف أولاً!");
+            if (!prompt) return alert("اكتب وصفاً أولاً!");
 
-            const btn = document.getElementById('mainBtn');
-            const resultArea = document.getElementById('resultArea');
-            const loaderBox = document.getElementById('loaderBox');
-            const resultImg = document.getElementById('resultImg');
-            const actionButtons = document.getElementById('actionButtons');
+            const btn = document.getElementById('genBtn');
+            const statusArea = document.getElementById('statusArea');
+            const loader = document.getElementById('loader');
+            const imgContainer = document.getElementById('imgContainer');
+            const outputImg = document.getElementById('outputImg');
 
-            // 1. تجهيز الحالة
+            // 1. واجهة المستخدم
             btn.disabled = true;
-            btn.style.opacity = "0.5";
-            resultArea.classList.remove('hidden');
-            loaderBox.classList.remove('hidden');
-            resultImg.classList.add('hidden');
-            actionButtons.classList.add('hidden');
+            btn.innerText = "جاري الاتصال...";
+            statusArea.classList.remove('hidden');
+            loader.classList.remove('hidden');
+            imgContainer.classList.add('hidden');
 
-            // 2. بناء الرابط (استخدام موديل flux لضمان الجودة)
-            const seed = Math.floor(Math.random() * 9999999);
-            const encodedPrompt = encodeURIComponent(prompt);
-            const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1024&height=1024&seed=${seed}&model=flux&nologo=true`;
+            try {
+                // 2. بناء الرابط بـ Seed عشوائي وموديل سريع
+                const seed = Math.floor(Math.random() * 1000000);
+                const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=768&height=768&seed=${seed}&nologo=true&model=flux`;
 
-            // 3. وضع الرابط في الصورة مباشرة (المتصفح سيقوم بالتحميل)
-            resultImg.src = imageUrl;
+                // 3. الحل العبقري: جلب الصورة كـ Blob لمنع أخطاء الخادم
+                const response = await fetch(url);
+                if (!response.ok) throw new Error('Server busy');
+                
+                const blob = await response.blob();
+                const objectURL = URL.createObjectURL(blob);
+
+                // 4. عرض الصورة
+                outputImg.src = objectURL;
+                loader.classList.add('hidden');
+                imgContainer.classList.remove('hidden');
+                btn.disabled = false;
+                btn.innerText = "ارسم الآن بقوة HOMOS";
+
+            } catch (error) {
+                console.error(error);
+                alert("الخادم مشغول جداً حالياً، سأحولك الآن لمحرك احتياطي فوري...");
+                // محرك احتياطي سريع جداً (Turbo)
+                const seed = Math.floor(Math.random() * 1000);
+                outputImg.src = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?model=turbo&seed=${seed}`;
+                loader.classList.add('hidden');
+                imgContainer.classList.remove('hidden');
+                btn.disabled = false;
+                btn.innerText = "ارسم الآن بقوة HOMOS";
+            }
         }
 
-        // هذه الدالة تعمل فور اكتمال تحميل الصورة فعلياً
-        function onImageLoad() {
-            document.getElementById('loaderBox').classList.add('hidden');
-            document.getElementById('resultImg').classList.remove('hidden');
-            document.getElementById('actionButtons').classList.remove('hidden');
-            document.getElementById('mainBtn').disabled = false;
-            document.getElementById('mainBtn').style.opacity = "1";
-        }
-
-        // هذه الدالة تعمل في حال فشل الرابط تماماً
-        function onImageError() {
-            alert("عذراً، الخادم يواجه ضغطاً كبيراً. سنحاول مرة أخرى تلقائياً بموديل أسرع.");
-            const prompt = document.getElementById('promptInput').value;
-            const seed = Math.floor(Math.random() * 1000);
-            // محاولة بديلة بموديل أخف (Turbo)
-            document.getElementById('resultImg').src = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=512&height=512&seed=${seed}`;
-        }
-
-        function downloadImage() {
-            const imgSrc = document.getElementById('resultImg').src;
-            const link = document.createElement('a');
-            link.href = imgSrc;
-            link.download = `HOMOS_STUDIO_${Date.now()}.png`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+        function download() {
+            const imgSrc = document.getElementById('outputImg').src;
+            const a = document.createElement('a');
+            a.href = imgSrc;
+            a.download = `HOMOS_Studio_${Date.now()}.png`;
+            a.click();
         }
     </script>
 </body>
