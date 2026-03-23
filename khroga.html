@@ -3,120 +3,186 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HOMOS Studio | النسخة المستقرة</title>
+    <title>HOMOS Studio | النسخة المستقرة والفائقة</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        .homos-loader {
-            width: 60px; height: 60px;
-            border: 5px solid #a78bfa; border-bottom-color: transparent;
-            border-radius: 50%; display: inline-block;
-            animation: rotation 1s linear infinite;
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        homos_bg: '#030712', // لون خلفية أغمق وأفخم
+                        homos_primary: '#a78bfa',
+                        homos_secondary: '#22d3ee',
+                        homos_card: '#111827'
+                    }
+                }
+            }
         }
-        @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .fade-in { animation: fadeIn 0.4s ease-out; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </script>
+    <style>
+        /* ستايل خاص للوغو المتحرك أثناء التحميل (الـ Spinner) */
+        .homos-spinner {
+            width: 50px; height: 50px;
+            border: 4px solid rgba(167, 139, 250, 0.1);
+            border-left-color: #a78bfa;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        
+        /* تأثير الغلوم (Glow) خلف الكارت */
+        .glow { box-shadow: 0 0 40px -10px rgba(167, 139, 250, 0.2); }
+        
+        /* تأثير الظهور الناعم (Fade In) */
+        .fade-in { animation: fadeIn 0.5s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
-<body class="bg-[#050810] text-white min-h-screen font-sans">
+<body class="bg-homos_bg text-slate-100 min-h-screen font-sans selection:bg-homos_primary selection:text-homos_bg">
 
-    <nav class="p-6 border-b border-white/5 bg-black/20 backdrop-blur-md">
-        <div class="max-w-4xl mx-auto flex justify-between items-center">
-            <h1 class="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-cyan-400">HOMOS.Studio</h1>
-            <span class="text-[10px] bg-white/10 px-2 py-1 rounded border border-white/10 uppercase tracking-widest">Ultra Stable</span>
+    <nav class="border-b border-slate-800 bg-homos_bg/90 backdrop-blur-md sticky top-0 z-50">
+        <div class="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-homos_primary to-homos_secondary flex items-center justify-center font-black text-homos_bg text-lg rotate-3">H</div>
+                <h1 class="text-2xl font-black tracking-tighter">
+                    HOMOS<span class="text-homos_secondary text-3xl">.</span>Studio
+                </h1>
+            </div>
+            <span class="text-[10px] font-mono text-slate-500 bg-slate-900 px-3 py-1 rounded-full border border-slate-800">ULTRA STABLE V2</span>
         </div>
     </nav>
 
-    <main class="max-w-3xl mx-auto px-6 py-12">
-        <div class="bg-[#0f172a] rounded-3xl p-8 border border-white/5 shadow-2xl">
-            <div class="space-y-4">
-                <textarea id="promptInput" rows="3" 
-                    class="w-full bg-[#050810] border border-white/10 rounded-2xl p-4 text-lg outline-none focus:border-violet-500 transition-colors"
-                    placeholder="اكتب وصف الصورة بالإنجليزية هنا..."></textarea>
-                
-                <button onclick="generate()" id="mainBtn"
-                    class="w-full bg-gradient-to-r from-violet-600 to-cyan-600 hover:from-violet-500 hover:to-cyan-500 py-4 rounded-2xl font-bold text-lg shadow-lg transition-all active:scale-95">
-                    توليد الصورة الآن
+    <main class="max-w-3xl mx-auto px-6 py-16">
+        
+        <div class="text-center mb-12 fade-in">
+            <h2 class="text-4xl md:text-5xl font-bold mb-4 tracking-tight">ابداع <span class="text-transparent bg-clip-text bg-gradient-to-l from-homos_primary to-homos_secondary">بلا حدود.</span></h2>
+            <p class="text-slate-400 text-lg max-w-xl mx-auto">أداة HOMOS الذكية والمستقرة لتوليد الصور الفنية مجاناً وبالدقة الكاملة.</p>
+        </div>
+
+        <div class="bg-homos_card rounded-3xl p-1 border border-slate-800 shadow-2xl transition-all glow hover:border-slate-700">
+            <div class="p-8 space-y-6">
+                <div>
+                    <label class="block text-sm font-medium text-slate-400 mb-3 mr-1">اكتب وصف الصورة (بالإنجليزية للحصول على أفضل النتائج):</label>
+                    <textarea id="promptInput" rows="3" 
+                        class="w-full bg-homos_bg border border-slate-700 rounded-2xl px-5 py-4 text-white focus:ring-2 focus:ring-homos_primary outline-none transition duration-300 placeholder-slate-600 shadow-inner text-lg"
+                        placeholder="e.g. A majestic lion made of celestial energy, galaxy background, cinematic lighting, 8k resolution..."></textarea>
+                </div>
+
+                <button onclick="generateImage()" id="genBtn"
+                    class="w-full bg-white text-homos_bg font-bold py-4 rounded-2xl hover:bg-homos_primary hover:scale-[1.01] active:scale-95 transition-all flex items-center justify-center gap-3 group text-lg relative overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed">
+                    <span id="btnText">توليد الصورة السحرية</span>
+                    <svg id="btnSpinner" class="hidden animate-spin w-5 h-5 text-homos_bg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                        <path d="M21 12a9 9 0 11-6.219-8.56" stroke-linecap="round"></path>
+                    </svg>
                 </button>
             </div>
+        </div>
 
-            <div id="displayArea" class="mt-10 hidden text-center fade-in">
-                <div id="loaderBox" class="py-12">
-                    <span class="homos-loader"></span>
-                    <p class="mt-4 text-violet-400 animate-pulse font-medium">HOMOS يقوم بمعالجة خيالك...</p>
+        <div id="resultArea" class="mt-12 hidden fade-in text-center relative">
+            
+            <div id="homosLoader" class="py-16 flex flex-col items-center justify-center gap-6 bg-homos_card rounded-3xl border border-slate-800">
+                <div class="homos-spinner"></div>
+                <p class="text-homos_primary text-lg font-medium animate-pulse">HOMOS يقوم بمعالجة خيالك، يرجى الانتظار قليلاً...</p>
+            </div>
+
+            <div id="imageBox" class="hidden relative group inline-block fade-in">
+                <div class="absolute -inset-1 bg-gradient-to-r from-homos_primary to-homos_secondary rounded-3xl blur opacity-20 group-hover:opacity-40 transition duration-1000"></div>
+                <div class="relative bg-slate-900 rounded-3xl overflow-hidden border-4 border-slate-950 shadow-2xl min-h-[300px] flex items-center justify-center">
+                    <img id="outputImage" src="" alt="Generated Image" class="w-full h-auto object-cover transition-opacity duration-500">
                 </div>
                 
-                <div id="imageBox" class="hidden relative group">
-                    <img id="resultImg" src="" class="w-full rounded-2xl border-4 border-black shadow-2xl transition-all duration-700">
-                    <div class="mt-4 flex gap-3">
-                        <button onclick="downloadImg()" class="flex-1 bg-white/10 hover:bg-white/20 py-3 rounded-xl text-sm border border-white/10">حفظ الصورة</button>
-                        <button onclick="window.location.reload()" class="px-6 bg-red-500/10 text-red-400 py-3 rounded-xl text-sm border border-red-500/20">مسح</button>
-                    </div>
+                <div class="mt-8 flex justify-center gap-4">
+                    <button onclick="downloadImage()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-6 py-3 rounded-xl text-sm transition border border-slate-700 flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                        حفظ الصورة بدقة كاملة
+                    </button>
+                    <button onclick="window.location.reload()" class="bg-red-950/30 hover:bg-red-950/50 text-red-400 px-6 py-3 rounded-xl text-sm transition border border-red-900/50 flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                        مسح وإعادة تعيين
+                    </button>
                 </div>
             </div>
         </div>
+
     </main>
 
+    <footer class="py-10 text-center text-slate-700 border-t border-slate-900 mt-16 bg-slate-950/50">
+        <p class="text-xs tracking-widest uppercase">© 2026 HOMOS CREATIVE LABS | نسخة فائقة الاستقرار</p>
+    </footer>
+
     <script>
-        async function generate() {
+        async function generateImage() {
             const prompt = document.getElementById('promptInput').value.trim();
-            if (!prompt) return alert("من فضلك اكتب وصفاً أولاً");
-
-            const btn = document.getElementById('mainBtn');
-            const displayArea = document.getElementById('displayArea');
-            const loaderBox = document.getElementById('loaderBox');
+            const btn = document.getElementById('genBtn');
+            const btnText = document.getElementById('btnText');
+            const btnSpinner = document.getElementById('btnSpinner');
+            const resultArea = document.getElementById('resultArea');
             const imageBox = document.getElementById('imageBox');
-            const resultImg = document.getElementById('resultImg');
+            const outputImg = document.getElementById('outputImage');
+            const loader = document.getElementById('homosLoader');
 
-            // تجهيز الواجهة
+            if (!prompt) {
+                alert('من فضلك اكتب وصفاً أولاً!');
+                return;
+            }
+
+            // 1. تفعيل حالة التحميل وإظهار اللوجو
             btn.disabled = true;
-            btn.style.opacity = "0.5";
-            displayArea.classList.remove('hidden');
-            loaderBox.classList.remove('hidden');
-            imageBox.classList.add('hidden');
+            btnText.innerText = 'جاري التوليد...';
+            btnSpinner.classList.remove('hidden');
+            
+            resultArea.classList.remove('hidden'); // إظهار منطقة النتيجة
+            loader.classList.remove('hidden'); // إظهار لوجو التحميل الخاص
+            imageBox.classList.add('hidden'); // إخفاء الصورة السابقة (إن وجدت)
 
-            // الحل الجذري للخطأ: التشفير الصحيح وإضافة Seed عشوائي
-            const safePrompt = encodeURIComponent(prompt);
-            const seed = Math.floor(Math.random() * 999999);
-            // استخدمنا العرض 512 لضمان استجابة سريعة جداً وتجنب "التايم أوت"
-            const url = `https://image.pollinations.ai/prompt/${safePrompt}?width=512&height=512&seed=${seed}&model=flux&nologo=true`;
+            // 2. إنشاء رابط الصورة (مع تشفير الوصف وتوليد الـ Seed تلقائياً)
+            // التشفير (encodeURIComponent) هو الحل لمنع أخطاء الروابط
+            const encodedPrompt = encodeURIComponent(prompt);
+            // الـ Seed العشوائي يضمن توليد صورة جديدة في كل مرة
+            const randomSeed = Math.floor(Math.random() * 10000000);
+            const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?model=flux&seed=${randomSeed}&width=768&height=768&nologo=true`;
 
-            // اختبار تحميل الصورة
-            const tempImg = new Image();
-            tempImg.src = url;
-
-            tempImg.onload = () => {
-                resultImg.src = url;
-                loaderBox.classList.add('hidden');
-                imageBox.classList.remove('hidden');
-                btn.disabled = false;
-                btn.style.opacity = "1";
-            };
-
-            tempImg.onerror = () => {
-                // محاولة أخيرة في حال فشل الرابط الأول بموديل أبسط
-                console.log("Retrying with simple model...");
-                resultImg.src = `https://image.pollinations.ai/prompt/${safePrompt}?width=512&height=512&seed=${seed}`;
+            // 3. تحميل الصورة في الخلفية وانتظار اكتمالها
+            // لقد ألغينا الـ Timeout القصيرة، سننتظر الصورة حتى تجهز
+            const img = new Image();
+            img.src = imageUrl;
+            
+            img.onload = () => {
+                // عند اكتمال التحميل: عرض الصورة وإخفاء لوجو التحميل
+                outputImg.src = imageUrl;
+                loader.classList.add('hidden'); // إخفاء اللوجو
+                imageBox.classList.remove('hidden'); // إظهار الصورة
                 
-                // إذا فشل تماماً بعد 5 ثوانٍ
-                setTimeout(() => {
-                    if (imageBox.classList.contains('hidden')) {
-                        alert("عذراً، الخادم مشغول حالياً. حاول تقصير الوصف أو المحاولة بعد ثوانٍ.");
-                        btn.disabled = false;
-                        btn.style.opacity = "1";
-                        displayArea.classList.add('hidden');
-                    }
-                }, 8000);
+                // إعادة الزر لحالته
+                btn.disabled = false;
+                btnText.innerText = 'توليد صورة سحرية أخرى';
+                btnSpinner.classList.add('hidden');
+                
+                // التمرير التلقائي للصورة المكتملة
+                imageBox.scrollIntoView({ behavior: 'smooth' });
             };
+
+            img.onerror = () => {
+                // في حال حدوث خطأ حقيقي (وليس مجرد تأخير)
+                alert('عذراً، حدث خطأ غير متوقع. جرب وصفاً آخر أو أعد المحاولة بعد قليل.');
+                loader.classList.add('hidden');
+                resultArea.classList.add('hidden');
+                btn.disabled = false;
+                btnText.innerText = 'إعادة المحاولة';
+                btnSpinner.classList.add('hidden');
+            }
         }
 
-        function downloadImg() {
-            const url = document.getElementById('resultImg').src;
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `HOMOS_Studio_${Date.now()}.png`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
+        function downloadImage() {
+            const imgSrc = document.getElementById('outputImage').src;
+            if(!imgSrc) return;
+            const link = document.createElement('a');
+            link.href = imgSrc;
+            // اسم الملف يحتوي على توقيت التوليد لضمان التميز
+            link.download = `HOMOS_Studio_${Date.now()}.png`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
     </script>
 </body>
