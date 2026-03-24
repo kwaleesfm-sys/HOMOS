@@ -3,116 +3,299 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HOMOS Studio | المحرك فائق القوة</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>HOMOS LUXURY | الإمبراطورية الذهبية</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        .homos-spinner {
-            width: 50px; height: 50px;
-            border: 5px solid rgba(167, 139, 250, 0.2);
-            border-top-color: #a78bfa;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
+        :root {
+            --gold: #FFD700;
+            --gold-dark: #B8860B;
+            --bg: #050505;
+            --card-bg: #111111;
+            --glass: rgba(255, 255, 255, 0.05);
         }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .glow { box-shadow: 0 0 40px -10px rgba(167, 139, 250, 0.3); }
+
+        * { box-sizing: border-box; transition: all 0.3s ease; }
+        
+        body {
+            background-color: var(--bg);
+            color: #fff;
+            font-family: 'Tajawal', sans-serif;
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        /* خلفية متحركة خفيفة */
+        body::before {
+            content: "";
+            position: fixed;
+            top: -10%; left: -10%;
+            width: 120%; height: 120%;
+            background: radial-gradient(circle, #1a1a00 0%, #050505 70%);
+            z-index: -1;
+        }
+
+        header {
+            padding: 40px 20px;
+            text-align: center;
+            background: linear-gradient(to bottom, #111, transparent);
+        }
+
+        .brand-name {
+            font-size: 3.5rem;
+            font-weight: 900;
+            background: linear-gradient(45deg, var(--gold), #fff, var(--gold-dark));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            margin: 0;
+        }
+
+        .tagline { color: #888; letter-spacing: 2px; font-size: 0.9rem; }
+
+        .container { max-width: 1200px; margin: auto; padding: 20px; }
+
+        /* الأقسام المالية */
+        .finance-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 50px;
+        }
+
+        .f-card {
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            padding: 30px;
+            border-radius: 25px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .f-card::after {
+            content: "";
+            position: absolute;
+            top: 0; right: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,215,0,0.1), transparent);
+            transition: 0.5s;
+        }
+
+        .f-card:hover::after { right: 100%; }
+
+        h2.gold-title {
+            color: var(--gold);
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+            border-bottom: 2px solid var(--gold);
+            display: inline-block;
+        }
+
+        /* المتجر الذكي */
+        .shop-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+        }
+
+        .product-item {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 10px;
+            border: 1px solid #222;
+        }
+
+        .product-item:hover {
+            border-color: var(--gold);
+            transform: scale(1.03);
+        }
+
+        .img-box {
+            width: 100%;
+            height: 250px;
+            background: #222;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+        }
+
+        .btn-main {
+            background: var(--gold);
+            color: #000;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            font-size: 1.1rem;
+        }
+
+        .btn-main:active { transform: scale(0.95); }
+
+        /* لوحة التحكم المخفية */
+        #adminPanel {
+            display: none;
+            background: #1a1a1a;
+            padding: 30px;
+            border-radius: 20px;
+            margin-top: 50px;
+            border: 2px dashed var(--gold);
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            background: #333;
+            border: 1px solid #444;
+            color: #fff;
+            border-radius: 8px;
+        }
+
+        .admin-btn {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: #444;
+            border-radius: 50%;
+            width: 40px; height: 40px;
+            cursor: pointer;
+        }
     </style>
 </head>
-<body class="bg-[#030712] text-slate-100 min-h-screen font-sans selection:bg-violet-500">
+<body>
 
-    <nav class="border-b border-white/5 bg-black/40 backdrop-blur-md p-5 sticky top-0 z-50">
-        <div class="max-w-4xl mx-auto flex justify-between items-center">
-            <h1 class="text-2xl font-black bg-gradient-to-r from-violet-400 to-cyan-400 bg-clip-text text-transparent italic">HOMOS STUDIO</h1>
-            <span class="text-[10px] bg-green-500/20 text-green-400 px-3 py-1 rounded-full border border-green-500/30 font-mono tracking-widest">SERVER_ACTIVE</span>
+<header>
+    <h1 class="brand-name">HOMOS</h1>
+    <div class="tagline">WORLDWIDE LUXURY TRADING & INVESTMENTS</div>
+</header>
+
+<div class="container">
+    
+    <div class="finance-grid">
+        <div class="f-card">
+            <h2 class="gold-title">🏦 استثمر مع HOMOS</h2>
+            <p>حوّل مدخراتك إلى أسهم رابحة في أكبر دورة تجارية تقنية.</p>
+            <button class="btn-main" onclick="action('invest')">ابدأ الاستثمار الآن</button>
         </div>
-    </nav>
-
-    <main class="max-w-xl mx-auto px-6 py-12">
-        <div class="bg-[#0f172a] rounded-[2.5rem] p-8 border border-white/5 shadow-2xl glow">
-            <div class="space-y-6">
-                <textarea id="promptInput" rows="3" 
-                    class="w-full bg-[#030712] border border-white/10 rounded-2xl p-5 text-lg outline-none focus:border-violet-500 transition-all placeholder-slate-600 shadow-inner"
-                    placeholder="اكتب وصف الصورة (مثلاً: Futuristic Egyptian Pharaoh in 2077)"></textarea>
-                
-                <button onclick="generate()" id="genBtn"
-                    class="w-full bg-white text-black font-black py-5 rounded-2xl text-xl hover:bg-violet-400 hover:scale-[1.02] active:scale-95 transition-all shadow-xl shadow-violet-500/10">
-                    ارسم الآن بقوة HOMOS
-                </button>
-            </div>
-
-            <div id="statusArea" class="mt-12 hidden text-center space-y-6">
-                <div id="loader" class="flex flex-col items-center gap-4 py-10">
-                    <div class="homos-spinner"></div>
-                    <p class="text-violet-400 font-bold animate-pulse">جاري سحب البيانات من السحاب... يرجى الانتظار</p>
-                </div>
-                
-                <div id="imgContainer" class="hidden animate-in fade-in duration-700">
-                    <img id="outputImg" class="w-full rounded-3xl border-4 border-black shadow-2xl overflow-hidden shadow-violet-500/20">
-                    <div class="mt-8 grid grid-cols-2 gap-4">
-                        <button onclick="download()" class="bg-violet-600 hover:bg-violet-500 py-4 rounded-2xl font-bold text-sm">حفظ في الجهاز</button>
-                        <button onclick="location.reload()" class="bg-slate-800 hover:bg-slate-700 py-4 rounded-2xl font-bold text-sm">محاولة أخرى</button>
-                    </div>
-                </div>
-            </div>
+        <div class="f-card">
+            <h2 class="gold-title">💳 تمويل المشتريات</h2>
+            <p>قروض فورية وتقسيط بضمان البطاقة لأي منتج تريده.</p>
+            <button class="btn-main" style="background: transparent; border: 2px solid var(--gold); color: var(--gold);" onclick="action('loan')">اطلب تمويلك</button>
         </div>
-    </main>
+    </div>
 
-    <script>
-        async function generate() {
-            const prompt = document.getElementById('promptInput').value.trim();
-            if (!prompt) return alert("اكتب وصفاً أولاً!");
+    <div class="shop-header">
+        <h2 style="font-size: 2rem;">المتجر الحصري</h2>
+        <span id="clock" style="color: var(--gold);"></span>
+    </div>
 
-            const btn = document.getElementById('genBtn');
-            const statusArea = document.getElementById('statusArea');
-            const loader = document.getElementById('loader');
-            const imgContainer = document.getElementById('imgContainer');
-            const outputImg = document.getElementById('outputImg');
+    <div class="grid" id="mainGrid">
+        </div>
 
-            // 1. واجهة المستخدم
-            btn.disabled = true;
-            btn.innerText = "جاري الاتصال...";
-            statusArea.classList.remove('hidden');
-            loader.classList.remove('hidden');
-            imgContainer.classList.add('hidden');
+    <div id="adminPanel">
+        <h2 style="color: var(--gold);">إضافة منتج جديد لـ HOMOS</h2>
+        <input type="text" id="pName" placeholder="اسم المنتج">
+        <input type="number" id="pPrice" placeholder="السعر">
+        <input type="text" id="pEmoji" placeholder="أيقونة أو رابط صورة">
+        <button class="btn-main" onclick="addProduct()">نشر في المتجر</button>
+    </div>
 
-            try {
-                // 2. بناء الرابط بـ Seed عشوائي وموديل سريع
-                const seed = Math.floor(Math.random() * 1000000);
-                const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=768&height=768&seed=${seed}&nologo=true&model=flux`;
+</div>
 
-                // 3. الحل العبقري: جلب الصورة كـ Blob لمنع أخطاء الخادم
-                const response = await fetch(url);
-                if (!response.ok) throw new Error('Server busy');
-                
-                const blob = await response.blob();
-                const objectURL = URL.createObjectURL(blob);
+<button class="admin-btn" onclick="openAdmin()">⚙️</button>
 
-                // 4. عرض الصورة
-                outputImg.src = objectURL;
-                loader.classList.add('hidden');
-                imgContainer.classList.remove('hidden');
-                btn.disabled = false;
-                btn.innerText = "ارسم الآن بقوة HOMOS";
+<div style="text-align: center; padding: 50px; color: #444;">
+    HOMOS GLOBAL HOLDINGS © 2026 | EL MAHALLA EL KUBRA
+</div>
 
-            } catch (error) {
-                console.error(error);
-                alert("الخادم مشغول جداً حالياً، سأحولك الآن لمحرك احتياطي فوري...");
-                // محرك احتياطي سريع جداً (Turbo)
-                const seed = Math.floor(Math.random() * 1000);
-                outputImg.src = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?model=turbo&seed=${seed}`;
-                loader.classList.add('hidden');
-                imgContainer.classList.remove('hidden');
-                btn.disabled = false;
-                btn.innerText = "ارسم الآن بقوة HOMOS";
+<script>
+    // الرقم الخاص بـ HOMOS
+    const WHATSAPP_NUMBER = "201016553764";
+
+    // بيانات المنتجات الأولية
+    let products = JSON.parse(localStorage.getItem('homos_products')) || [
+        { name: "PS5 Custom Edition", price: "35,000", emoji: "🎮" },
+        { name: "iPhone 17 Pro Max", price: "75,000", emoji: "📱" }
+    ];
+
+    function renderProducts() {
+        const grid = document.getElementById('mainGrid');
+        grid.innerHTML = "";
+        products.forEach((p, index) => {
+            grid.innerHTML += `
+                <div class="product-item">
+                    <div class="img-box">${p.emoji}</div>
+                    <h3 style="margin: 10px 0;">${p.name}</h3>
+                    <p style="color: var(--gold); font-size: 1.3rem; font-weight: bold;">${p.price} ج.م</p>
+                    <button class="btn-main" onclick="action('buy', '${p.name}')">شراء عبر واتساب</button>
+                </div>
+            `;
+        });
+    }
+
+    function action(type, detail = "") {
+        let msg = "";
+        if(type === 'invest') msg = "أهلاً HOMOS، أريد مناقشة شراء أسهم استثمارية في مشروعك.";
+        if(type === 'loan') msg = "أهلاً HOMOS، أريد الحصول على قرض/تمويل بضمان البطاقة.";
+        if(type === 'buy') msg = `أهلاً HOMOS، أريد طلب شراء المنتج: ${detail}`;
+        
+        window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`, '_blank');
+    }
+
+    function openAdmin() {
+        Swal.fire({
+            title: 'دخول الإدارة',
+            input: 'password',
+            inputPlaceholder: 'كلمة السر يا حمص',
+            showCancelButton: true
+        }).then((result) => {
+            if (result.value === "HOMOS2026") { // كلمة السر هنا
+                document.getElementById('adminPanel').style.display = 'block';
+                window.scrollTo(0, document.body.scrollHeight);
+            } else if(result.value) {
+                Swal.fire('خطأ', 'كلمة السر غلط يا بطل', 'error');
             }
-        }
+        });
+    }
 
-        function download() {
-            const imgSrc = document.getElementById('outputImg').src;
-            const a = document.createElement('a');
-            a.href = imgSrc;
-            a.download = `HOMOS_Studio_${Date.now()}.png`;
-            a.click();
+    function addProduct() {
+        const name = document.getElementById('pName').value;
+        const price = document.getElementById('pPrice').value;
+        const emoji = document.getElementById('pEmoji').value;
+
+        if(name && price) {
+            products.push({ name, price, emoji });
+            localStorage.setItem('homos_products', JSON.stringify(products));
+            renderProducts();
+            document.getElementById('adminPanel').style.display = 'none';
+            Swal.fire('تم!', 'المنتج نزل المتجر بنجاح', 'success');
         }
-    </script>
+    }
+
+    // الساعة
+    setInterval(() => {
+        document.getElementById('clock').innerText = new Date().toLocaleTimeString('ar-EG');
+    }, 1000);
+
+    renderProducts();
+</script>
+
 </body>
 </html>
