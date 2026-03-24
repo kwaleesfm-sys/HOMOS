@@ -2,300 +2,291 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HOMOS LUXURY | الإمبراطورية الذهبية</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>HOMOS GLOBAL APP</title>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
     <style>
         :root {
             --gold: #FFD700;
-            --gold-dark: #B8860B;
             --bg: #050505;
-            --card-bg: #111111;
-            --glass: rgba(255, 255, 255, 0.05);
+            --card-bg: #151515;
+            --nav-bg: #111111;
+            --text: #ffffff;
         }
 
-        * { box-sizing: border-box; transition: all 0.3s ease; }
+        * { box-sizing: border-box; font-family: 'Tajawal', sans-serif; transition: 0.3s; }
         
         body {
-            background-color: var(--bg);
-            color: #fff;
-            font-family: 'Tajawal', sans-serif;
-            margin: 0;
-            overflow-x: hidden;
+            background-color: var(--bg); color: var(--text); margin: 0; padding: 0;
+            padding-bottom: 80px;
         }
 
-        /* خلفية متحركة خفيفة */
-        body::before {
-            content: "";
-            position: fixed;
-            top: -10%; left: -10%;
-            width: 120%; height: 120%;
-            background: radial-gradient(circle, #1a1a00 0%, #050505 70%);
-            z-index: -1;
+        /* شاشة تسجيل الدخول */
+        #auth-screen {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            height: 100vh; padding: 20px; background: linear-gradient(180deg, #111, #000);
         }
-
-        header {
-            padding: 40px 20px;
-            text-align: center;
-            background: linear-gradient(to bottom, #111, transparent);
+        
+        .brand-logo { font-size: 3rem; font-weight: 900; color: var(--gold); letter-spacing: 3px; margin-bottom: 30px; }
+        
+        .auth-input {
+            width: 100%; max-width: 350px; padding: 15px; margin: 10px 0;
+            background: #222; border: 1px solid #333; color: #fff; border-radius: 12px; font-size: 1rem;
         }
-
-        .brand-name {
-            font-size: 3.5rem;
-            font-weight: 900;
-            background: linear-gradient(45deg, var(--gold), #fff, var(--gold-dark));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-transform: uppercase;
-            letter-spacing: 5px;
-            margin: 0;
+        
+        .auth-input:focus { border-color: var(--gold); outline: none; }
+        
+        .btn {
+            width: 100%; max-width: 350px; padding: 15px; margin: 10px 0;
+            border: none; border-radius: 12px; font-size: 1.1rem; font-weight: bold; cursor: pointer;
         }
+        .btn-gold { background: var(--gold); color: #000; }
+        .btn-outline { background: transparent; border: 1px solid var(--gold); color: var(--gold); }
 
-        .tagline { color: #888; letter-spacing: 2px; font-size: 0.9rem; }
+        /* التطبيق الرئيسي */
+        #main-app { display: none; }
+        
+        .header { padding: 20px; text-align: center; border-bottom: 1px solid #333; }
+        .tab-content { display: none; padding: 20px; animation: fadeIn 0.3s; }
+        .tab-content.active { display: block; }
 
-        .container { max-width: 1200px; margin: auto; padding: 20px; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* الأقسام المالية */
-        .finance-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 25px;
-            margin-bottom: 50px;
+        /* كروت المنتجات */
+        .product-card { background: var(--card-bg); border: 1px solid #222; border-radius: 15px; padding: 15px; margin-bottom: 20px; }
+        .product-img { width: 100%; height: 200px; object-fit: cover; border-radius: 10px; margin-bottom: 15px; background: #222; }
+        .product-title { font-size: 1.2rem; margin: 0 0 5px; }
+        .product-desc { color: #888; font-size: 0.9rem; margin-bottom: 10px; }
+        .product-price { color: var(--gold); font-size: 1.3rem; font-weight: bold; margin-bottom: 15px; }
+
+        /* الإدارة */
+        .admin-form { background: var(--card-bg); padding: 20px; border-radius: 15px; border: 1px dashed var(--gold); }
+        .file-upload-wrapper { position: relative; width: 100%; height: 150px; border: 2px dashed #444; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #888; margin: 15px 0; cursor: pointer; overflow: hidden; }
+        .file-upload-wrapper img { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; display: none; }
+        .file-upload-wrapper input[type="file"] { position: absolute; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+
+        /* الشريط السفلي */
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 0; width: 100%; background: var(--nav-bg);
+            display: flex; justify-content: space-around; padding: 15px 0;
+            border-top: 1px solid #333; z-index: 1000;
         }
-
-        .f-card {
-            background: var(--glass);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(212, 175, 55, 0.2);
-            padding: 30px;
-            border-radius: 25px;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .f-card::after {
-            content: "";
-            position: absolute;
-            top: 0; right: -100%;
-            width: 100%; height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,215,0,0.1), transparent);
-            transition: 0.5s;
-        }
-
-        .f-card:hover::after { right: 100%; }
-
-        h2.gold-title {
-            color: var(--gold);
-            font-size: 1.8rem;
-            margin-bottom: 15px;
-            border-bottom: 2px solid var(--gold);
-            display: inline-block;
-        }
-
-        /* المتجر الذكي */
-        .shop-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-        }
-
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 25px;
-        }
-
-        .product-item {
-            background: var(--card-bg);
-            border-radius: 20px;
-            padding: 10px;
-            border: 1px solid #222;
-        }
-
-        .product-item:hover {
-            border-color: var(--gold);
-            transform: scale(1.03);
-        }
-
-        .img-box {
-            width: 100%;
-            height: 250px;
-            background: #222;
-            border-radius: 15px;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 3rem;
-        }
-
-        .btn-main {
-            background: var(--gold);
-            color: #000;
-            border: none;
-            padding: 15px 30px;
-            border-radius: 50px;
-            font-weight: bold;
-            cursor: pointer;
-            width: 100%;
-            font-size: 1.1rem;
-        }
-
-        .btn-main:active { transform: scale(0.95); }
-
-        /* لوحة التحكم المخفية */
-        #adminPanel {
-            display: none;
-            background: #1a1a1a;
-            padding: 30px;
-            border-radius: 20px;
-            margin-top: 50px;
-            border: 2px dashed var(--gold);
-        }
-
-        input {
-            width: 100%;
-            padding: 12px;
-            margin: 10px 0;
-            background: #333;
-            border: 1px solid #444;
-            color: #fff;
-            border-radius: 8px;
-        }
-
-        .admin-btn {
-            position: fixed;
-            bottom: 20px;
-            left: 20px;
-            background: rgba(255,255,255,0.1);
-            border: none;
-            color: #444;
-            border-radius: 50%;
-            width: 40px; height: 40px;
-            cursor: pointer;
-        }
+        .nav-item { color: #888; text-align: center; cursor: pointer; font-size: 0.9rem; display: flex; flex-direction: column; align-items: center; gap: 5px; }
+        .nav-item.active { color: var(--gold); }
+        .nav-icon { font-size: 1.5rem; }
     </style>
 </head>
 <body>
 
-<header>
-    <h1 class="brand-name">HOMOS</h1>
-    <div class="tagline">WORLDWIDE LUXURY TRADING & INVESTMENTS</div>
-</header>
-
-<div class="container">
-    
-    <div class="finance-grid">
-        <div class="f-card">
-            <h2 class="gold-title">🏦 استثمر مع HOMOS</h2>
-            <p>حوّل مدخراتك إلى أسهم رابحة في أكبر دورة تجارية تقنية.</p>
-            <button class="btn-main" onclick="action('invest')">ابدأ الاستثمار الآن</button>
-        </div>
-        <div class="f-card">
-            <h2 class="gold-title">💳 تمويل المشتريات</h2>
-            <p>قروض فورية وتقسيط بضمان البطاقة لأي منتج تريده.</p>
-            <button class="btn-main" style="background: transparent; border: 2px solid var(--gold); color: var(--gold);" onclick="action('loan')">اطلب تمويلك</button>
-        </div>
+    <div id="auth-screen">
+        <div class="brand-logo">HOMOS</div>
+        <p style="color: #888; margin-bottom: 20px;">منصة الأعمال والاستثمار</p>
+        <input type="email" id="email" class="auth-input" placeholder="البريد الإلكتروني">
+        <input type="password" id="password" class="auth-input" placeholder="كلمة المرور">
+        <button class="btn btn-gold" onclick="window.loginUser()">دخول</button>
+        <button class="btn btn-outline" onclick="window.signupUser()">إنشاء حساب جديد</button>
     </div>
 
-    <div class="shop-header">
-        <h2 style="font-size: 2rem;">المتجر الحصري</h2>
-        <span id="clock" style="color: var(--gold);"></span>
-    </div>
-
-    <div class="grid" id="mainGrid">
+    <div id="main-app">
+        <div class="header">
+            <h2 style="margin: 0; color: var(--gold);">HOMOS GLOBAL</h2>
+            <p id="user-email" style="font-size: 0.8rem; color: #888; margin: 5px 0 0;"></p>
         </div>
 
-    <div id="adminPanel">
-        <h2 style="color: var(--gold);">إضافة منتج جديد لـ HOMOS</h2>
-        <input type="text" id="pName" placeholder="اسم المنتج">
-        <input type="number" id="pPrice" placeholder="السعر">
-        <input type="text" id="pEmoji" placeholder="أيقونة أو رابط صورة">
-        <button class="btn-main" onclick="addProduct()">نشر في المتجر</button>
-    </div>
-
-</div>
-
-<button class="admin-btn" onclick="openAdmin()">⚙️</button>
-
-<div style="text-align: center; padding: 50px; color: #444;">
-    HOMOS GLOBAL HOLDINGS © 2026 | EL MAHALLA EL KUBRA
-</div>
-
-<script>
-    // الرقم الخاص بـ HOMOS
-    const WHATSAPP_NUMBER = "201016553764";
-
-    // بيانات المنتجات الأولية
-    let products = JSON.parse(localStorage.getItem('homos_products')) || [
-        { name: "PS5 Custom Edition", price: "35,000", emoji: "🎮" },
-        { name: "iPhone 17 Pro Max", price: "75,000", emoji: "📱" }
-    ];
-
-    function renderProducts() {
-        const grid = document.getElementById('mainGrid');
-        grid.innerHTML = "";
-        products.forEach((p, index) => {
-            grid.innerHTML += `
-                <div class="product-item">
-                    <div class="img-box">${p.emoji}</div>
-                    <h3 style="margin: 10px 0;">${p.name}</h3>
-                    <p style="color: var(--gold); font-size: 1.3rem; font-weight: bold;">${p.price} ج.م</p>
-                    <button class="btn-main" onclick="action('buy', '${p.name}')">شراء عبر واتساب</button>
+        <div id="shop" class="tab-content active">
+            <h3 style="border-bottom: 2px solid var(--gold); padding-bottom: 10px; display: inline-block;">المتجر الإلكتروني</h3>
+            <div id="products-container">
                 </div>
-            `;
-        });
-    }
+        </div>
 
-    function action(type, detail = "") {
-        let msg = "";
-        if(type === 'invest') msg = "أهلاً HOMOS، أريد مناقشة شراء أسهم استثمارية في مشروعك.";
-        if(type === 'loan') msg = "أهلاً HOMOS، أريد الحصول على قرض/تمويل بضمان البطاقة.";
-        if(type === 'buy') msg = `أهلاً HOMOS، أريد طلب شراء المنتج: ${detail}`;
-        
-        window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`, '_blank');
-    }
+        <div id="finance" class="tab-content">
+            <div class="product-card" style="text-align: center;">
+                <h2 style="color: var(--gold);">استثمر أموالك</h2>
+                <p>شراء أسهم تجارية في منصة HOMOS بعوائد ممتازة.</p>
+                <button class="btn btn-gold" onclick="window.openWhatsApp('invest')">تواصل للاستثمار</button>
+            </div>
+            <div class="product-card" style="text-align: center;">
+                <h2 style="color: var(--gold);">طلب قرض / تمويل</h2>
+                <p>تمويل فوري للمشتريات بضمان البطاقة.</p>
+                <button class="btn btn-outline" onclick="window.openWhatsApp('loan')">تواصل لطلب تمويل</button>
+            </div>
+        </div>
 
-    function openAdmin() {
-        Swal.fire({
-            title: 'دخول الإدارة',
-            input: 'password',
-            inputPlaceholder: 'كلمة السر يا حمص',
-            showCancelButton: true
-        }).then((result) => {
-            if (result.value === "HOMOS2026") { // كلمة السر هنا
-                document.getElementById('adminPanel').style.display = 'block';
-                window.scrollTo(0, document.body.scrollHeight);
-            } else if(result.value) {
-                Swal.fire('خطأ', 'كلمة السر غلط يا بطل', 'error');
+        <div id="admin" class="tab-content">
+            <div class="admin-form">
+                <h3 style="color: var(--gold); text-align: center;">إضافة منتج للمتجر</h3>
+                <input type="text" id="p-name" class="auth-input" placeholder="اسم المنتج">
+                <input type="text" id="p-desc" class="auth-input" placeholder="وصف المنتج">
+                <input type="number" id="p-price" class="auth-input" placeholder="السعر (ج.م)">
+                
+                <div class="file-upload-wrapper">
+                    <span id="upload-text">اضغط لرفع صورة المنتج</span>
+                    <img id="preview-img" src="">
+                    <input type="file" id="p-file" accept="image/*" onchange="window.encodeImage(event)">
+                </div>
+
+                <button class="btn btn-gold" onclick="window.uploadProduct()">نشر المنتج الآن</button>
+                <button class="btn btn-outline" style="border-color: #ff4444; color: #ff4444;" onclick="window.logoutUser()">تسجيل الخروج</button>
+            </div>
+        </div>
+
+        <div class="bottom-nav">
+            <div class="nav-item active" onclick="window.switchTab('shop', this)">
+                <span class="nav-icon">🛒</span><span>المتجر</span>
+            </div>
+            <div class="nav-item" onclick="window.switchTab('finance', this)">
+                <span class="nav-icon">💰</span><span>التمويل</span>
+            </div>
+            <div class="nav-item" onclick="window.switchTab('admin', this)">
+                <span class="nav-icon">⚙️</span><span>الإدارة</span>
+            </div>
+        </div>
+    </div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+    import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+
+    // بيانات مشروعك الحقيقية
+    const firebaseConfig = {
+      apiKey: "AIzaSyAhg6oTG1EJ44ST1zkkeYvKpfLMD2JDV3M",
+      authDomain: "fir-c3e88.firebaseapp.com",
+      databaseURL: "https://fir-c3e88-default-rtdb.firebaseio.com",
+      projectId: "fir-c3e88",
+      storageBucket: "fir-c3e88.firebasestorage.app",
+      messagingSenderId: "202130175288",
+      appId: "1:202130175288:web:0d7ad99c3c828501b4fdcd",
+      measurementId: "G-J47JVNC93Q"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
+
+    const MY_PHONE = "201016553764";
+    let currentBase64 = "";
+
+    // 1. نظام المصادقة
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            document.getElementById('auth-screen').style.display = 'none';
+            document.getElementById('main-app').style.display = 'block';
+            document.getElementById('user-email').innerText = "مرحباً: " + user.email;
+            fetchProducts(); 
+        } else {
+            document.getElementById('auth-screen').style.display = 'flex';
+            document.getElementById('main-app').style.display = 'none';
+        }
+    });
+
+    window.signupUser = () => {
+        const e = document.getElementById('email').value;
+        const p = document.getElementById('password').value;
+        createUserWithEmailAndPassword(auth, e, p)
+            .then(() => Swal.fire('تم', 'تم إنشاء الحساب بنجاح', 'success'))
+            .catch(err => Swal.fire('خطأ', err.message, 'error'));
+    };
+
+    window.loginUser = () => {
+        const e = document.getElementById('email').value;
+        const p = document.getElementById('password').value;
+        signInWithEmailAndPassword(auth, e, p).catch(err => Swal.fire('خطأ', 'تأكد من البريد وكلمة المرور', 'error'));
+    };
+
+    window.logoutUser = () => signOut(auth);
+
+    // 2. تحويل الصورة إلى Base64
+    window.encodeImage = (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                currentBase64 = e.target.result;
+                const preview = document.getElementById('preview-img');
+                preview.src = currentBase64;
+                preview.style.display = 'block';
+                document.getElementById('upload-text').style.display = 'none';
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    // 3. رفع المنتج إلى Firebase Realtime Database
+    window.uploadProduct = () => {
+        const name = document.getElementById('p-name').value;
+        const desc = document.getElementById('p-desc').value;
+        const price = document.getElementById('p-price').value;
+
+        if(!name || !price || !currentBase64) {
+            Swal.fire('تنبيه', 'يجب إدخال الاسم والسعر واختيار صورة', 'warning');
+            return;
+        }
+
+        const productRef = ref(db, 'products');
+        push(productRef, {
+            name: name,
+            desc: desc,
+            price: price,
+            image: currentBase64
+        }).then(() => {
+            Swal.fire('تم!', 'المنتج أصبح متاحاً للجميع الآن', 'success');
+            document.getElementById('p-name').value = '';
+            document.getElementById('p-desc').value = '';
+            document.getElementById('p-price').value = '';
+            document.getElementById('preview-img').style.display = 'none';
+            document.getElementById('upload-text').style.display = 'block';
+            currentBase64 = "";
+            window.switchTab('shop', document.querySelectorAll('.nav-item')[0]);
+        }).catch(err => Swal.fire('خطأ', err.message, 'error'));
+    };
+
+    // 4. جلب المنتجات وعرضها
+    function fetchProducts() {
+        const productRef = ref(db, 'products');
+        onValue(productRef, (snapshot) => {
+            const container = document.getElementById('products-container');
+            container.innerHTML = '';
+            const data = snapshot.val();
+            
+            if(data) {
+                // عكس ترتيب المنتجات ليظهر الجديد أولاً
+                Object.keys(data).reverse().forEach(key => {
+                    const p = data[key];
+                    container.innerHTML += `
+                        <div class="product-card">
+                            <img src="${p.image}" class="product-img">
+                            <h3 class="product-title">${p.name}</h3>
+                            <p class="product-desc">${p.desc}</p>
+                            <p class="product-price">${p.price} ج.م</p>
+                            <button class="btn btn-gold" onclick="window.openWhatsApp('buy', '${p.name}')">طلب المنتج</button>
+                        </div>
+                    `;
+                });
+            } else {
+                container.innerHTML = '<p style="text-align:center; color:#888;">لا توجد منتجات حالياً.</p>';
             }
         });
     }
 
-    function addProduct() {
-        const name = document.getElementById('pName').value;
-        const price = document.getElementById('pPrice').value;
-        const emoji = document.getElementById('pEmoji').value;
+    // 5. التنقل والواتساب
+    window.switchTab = (tabId, element) => {
+        document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+        document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+        element.classList.add('active');
+        window.scrollTo(0, 0);
+    };
 
-        if(name && price) {
-            products.push({ name, price, emoji });
-            localStorage.setItem('homos_products', JSON.stringify(products));
-            renderProducts();
-            document.getElementById('adminPanel').style.display = 'none';
-            Swal.fire('تم!', 'المنتج نزل المتجر بنجاح', 'success');
-        }
-    }
-
-    // الساعة
-    setInterval(() => {
-        document.getElementById('clock').innerText = new Date().toLocaleTimeString('ar-EG');
-    }, 1000);
-
-    renderProducts();
+    window.openWhatsApp = (type, item = "") => {
+        let msg = "";
+        if(type === 'invest') msg = "أهلاً HOMOS، أريد الاستثمار في المنصة.";
+        if(type === 'loan') msg = "أهلاً HOMOS، أريد طلب تمويل/قرض.";
+        if(type === 'buy') msg = `أهلاً HOMOS، أريد شراء: ${item}`;
+        window.open(`https://wa.me/${MY_PHONE}?text=${encodeURIComponent(msg)}`, '_blank');
+    };
 </script>
-
 </body>
 </html>
