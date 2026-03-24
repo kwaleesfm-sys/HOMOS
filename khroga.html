@@ -3,147 +3,145 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>HOMOS LUXURY | إمبراطورية الزجاج</title>
+    <title>HOMOS PLATFORM | المنصة الملكية</title>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;500;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
     <style>
         :root {
             --gold: #FFD700;
-            --glass: rgba(255, 255, 255, 0.07);
-            --glass-border: rgba(255, 255, 255, 0.15);
-            --bg: #030303;
+            --glass: rgba(255, 255, 255, 0.08);
+            --glass-border: rgba(255, 255, 255, 0.12);
+            --bg: #020202;
         }
 
-        * { box-sizing: border-box; font-family: 'Tajawal', sans-serif; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        * { box-sizing: border-box; font-family: 'Tajawal', sans-serif; transition: 0.4s ease; }
         
         body {
             background-color: var(--bg);
-            background-image: radial-gradient(circle at 50% 50%, #1a1a00 0%, #030303 80%);
-            color: #fff;
-            margin: 0;
-            padding-bottom: 90px;
-            overflow-x: hidden;
+            background-image: radial-gradient(circle at top right, #1a1a00 0%, #020202 60%);
+            color: #fff; margin: 0; padding-bottom: 100px; overflow-x: hidden;
         }
 
-        /* تأثير الزجاج */
         .glass {
             background: var(--glass);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             border: 1px solid var(--glass-border);
-            border-radius: 20px;
+            border-radius: 25px;
         }
 
         /* شاشة الدخول */
-        #auth-screen {
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            height: 100vh; padding: 25px;
-        }
-
-        .brand-glow {
-            font-size: 4rem; font-weight: 800; color: #fff;
-            text-shadow: 0 0 20px var(--gold);
-            letter-spacing: 5px; margin-bottom: 10px;
-        }
-
-        .auth-card { width: 100%; max-width: 400px; padding: 30px; text-align: center; }
-
-        input {
-            width: 100%; padding: 15px; margin: 12px 0;
+        #auth-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; padding: 20px; }
+        .auth-card { width: 100%; max-width: 400px; padding: 40px 25px; text-align: center; }
+        
+        input, textarea {
+            width: 100%; padding: 15px; margin: 10px 0;
             background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border);
-            border-radius: 15px; color: #fff; outline: none;
+            border-radius: 15px; color: #fff; outline: none; font-size: 1rem;
         }
-        input:focus { border-color: var(--gold); box-shadow: 0 0 15px rgba(255, 215, 0, 0.2); }
+        input:focus, textarea:focus { border-color: var(--gold); box-shadow: 0 0 10px rgba(255, 215, 0, 0.1); }
 
         .btn {
-            width: 100%; padding: 15px; border: none; border-radius: 15px;
+            width: 100%; padding: 16px; border: none; border-radius: 15px;
             font-weight: 800; cursor: pointer; margin: 10px 0;
-            text-transform: uppercase; letter-spacing: 1px;
         }
-        .btn-gold { background: linear-gradient(45deg, var(--gold), #fff); color: #000; }
-        .btn-glass { background: var(--glass); color: var(--gold); border: 1px solid var(--gold); }
+        .btn-gold { background: linear-gradient(90deg, #FFD700, #FFB800); color: #000; }
+        .btn-glass { background: var(--glass); color: #fff; border: 1px solid var(--glass-border); }
 
-        /* التطبيق */
+        /* التطبيق الرئيسي */
         #main-app { display: none; padding: 15px; }
-        .header { text-align: center; margin-bottom: 30px; padding: 20px 0; }
-        
-        .tab-content { display: none; animation: slideUp 0.5s ease; }
+        .tab-content { display: none; animation: fadeIn 0.4s ease; }
         .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
-        @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* كروت المنتجات الزجاجية */
-        .product-card {
-            margin-bottom: 25px; padding: 15px; position: relative;
-            overflow: hidden; border: 1px solid var(--glass-border);
-        }
-        .product-card:hover { border-color: var(--gold); transform: scale(1.02); }
-        .product-img { width: 100%; height: 250px; object-fit: cover; border-radius: 15px; }
-        .price-tag { font-size: 1.5rem; font-weight: 800; color: var(--gold); margin: 10px 0; }
-
-        /* لوحة التحكم والرفع */
-        .upload-section { padding: 25px; margin-bottom: 30px; border: 1px dashed var(--gold); }
-        .request-box { 
-            background: rgba(255,215,0,0.05); border-right: 5px solid var(--gold); 
-            padding: 15px; border-radius: 10px; margin-bottom: 15px;
-        }
-
-        /* شريط التنقل السفلي */
+        /* الكروت */
+        .card { padding: 20px; margin-bottom: 20px; }
+        .product-img { width: 100%; height: 230px; object-fit: cover; border-radius: 20px; margin-bottom: 15px; }
+        .price { color: var(--gold); font-size: 1.6rem; font-weight: 800; margin: 5px 0; }
+        
+        /* شريط التنقل السفلي - 5 خانات */
         .bottom-nav {
-            position: fixed; bottom: 15px; left: 15px; right: 15px;
-            height: 70px; display: flex; justify-content: space-around;
-            align-items: center; z-index: 2000; border-radius: 25px;
+            position: fixed; bottom: 20px; left: 15px; right: 15px;
+            height: 75px; display: flex; justify-content: space-around;
+            align-items: center; z-index: 2000; padding: 0 10px;
         }
-        .nav-item { color: rgba(255,255,255,0.4); text-align: center; cursor: pointer; }
-        .nav-item.active { color: var(--gold); transform: translateY(-5px); }
-        .nav-item i { font-size: 1.5rem; display: block; }
+        .nav-item { color: rgba(255,255,255,0.4); text-align: center; cursor: pointer; flex: 1; }
+        .nav-item.active { color: var(--gold); transform: translateY(-8px); }
+        .nav-item i { font-size: 1.4rem; display: block; margin-bottom: 4px; }
+        .nav-item small { font-size: 0.65rem; font-weight: 500; }
+
+        /* لوحة التحكم */
+        .request-item { background: rgba(255,215,0,0.03); border-right: 4px solid var(--gold); margin-bottom: 15px; padding: 15px; }
     </style>
 </head>
 <body>
 
     <div id="auth-screen">
-        <div class="brand-glow">HOMOS</div>
+        <h1 style="color: var(--gold); font-size: 3.5rem; margin: 0; text-shadow: 0 0 30px rgba(255,215,0,0.3);">HOMOS</h1>
         <div class="glass auth-card">
-            <h2 style="margin-top: 0;">تسجيل دخول</h2>
             <input type="email" id="email" placeholder="البريد الإلكتروني">
             <input type="password" id="password" placeholder="كلمة المرور">
-            <button class="btn btn-gold" onclick="window.login()">دخول</button>
-            <button class="btn btn-glass" onclick="window.signup()">عضوية جديدة</button>
+            <button class="btn btn-gold" onclick="window.login()">دخول للأعمال</button>
+            <button class="btn btn-glass" onclick="window.signup()">عضوية إمبراطورية</button>
         </div>
     </div>
 
     <div id="main-app">
-        <div class="header">
-            <h1 style="color: var(--gold); margin: 0; font-size: 2.2rem;">HOMOS GLOBAL</h1>
-            <p id="user-info" style="color: #666; font-size: 0.8rem;"></p>
-        </div>
-
+        
         <div id="shop" class="tab-content active">
+            <h2 style="color: var(--gold); text-align: center; letter-spacing: 2px;">MARKETPLACE</h2>
             <div id="products-list"></div>
         </div>
 
+        <div id="services" class="tab-content">
+            <h2 style="color: var(--gold); text-align: center;">FINANCE & INVESTMENT</h2>
+            <div class="glass card" style="text-align: center;">
+                <h3 style="color: var(--gold);">💰 استثمر الآن</h3>
+                <p style="color: #aaa;">شارك في دورات HOMOS التجارية بضمانات حقيقية وأرباح مجزية.</p>
+                <button class="btn btn-gold" onclick="window.chat('استثمار')">ابدأ الاستثمار</button>
+            </div>
+            <div class="glass card" style="text-align: center;">
+                <h3 style="color: var(--gold);">💳 طلب تمويل</h3>
+                <p style="color: #aaa;">قروض حسنة وتقسيط للمنتجات بضمان البطاقة الشخصية.</p>
+                <button class="btn btn-glass" onclick="window.chat('تمويل')">اطلب تمويلك</button>
+            </div>
+        </div>
+
         <div id="add" class="tab-content">
-            <div class="glass upload-section">
-                <h2 style="color: var(--gold); text-align: center;">نشر منتج جديد</h2>
-                <p style="text-align: center; font-size: 0.8rem; color: #888;">ملاحظة: سيتم مراجعة منتجك من قبل الإدارة قبل النشر</p>
-                <input type="text" id="p-name" placeholder="ماذا تريد أن تبيع؟">
+            <div class="glass card">
+                <h2 style="color: var(--gold); text-align: center;">إضافة منتج جديد</h2>
+                <input type="text" id="p-name" placeholder="اسم المنتج">
+                <textarea id="p-desc" rows="3" placeholder="وصف المنتج بالتفصيل..."></textarea>
                 <input type="number" id="p-price" placeholder="السعر المطلوب">
-                <input type="file" accept="image/*" style="margin: 15px 0;" onchange="window.handleImg(event)">
-                <button class="btn btn-gold" onclick="window.sendToReview()">إرسال للمراجعة</button>
+                <input type="tel" id="p-phone" placeholder="رقم واتساب التواصل">
+                <p style="font-size: 0.8rem; color: #666;">ارفع صورة المنتج الحقيقية:</p>
+                <input type="file" accept="image/*" onchange="window.handleImg(event)">
+                <button class="btn btn-gold" onclick="window.sendToReview()">نشر للمراجعة</button>
+            </div>
+        </div>
+
+        <div id="profile" class="tab-content">
+            <div class="glass card" style="text-align: center;">
+                <div style="width: 80px; height: 80px; background: var(--gold); border-radius: 50%; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; color: #000; font-size: 2rem; font-weight: 800;">H</div>
+                <h3 id="user-mail-display">المستخدم</h3>
+                <p style="color: #666; font-size: 0.9rem;">عضو في إمبراطورية HOMOS</p>
+                <hr style="border: 0.5px solid var(--glass-border); margin: 20px 0;">
+                <button class="btn btn-glass" style="color: #ff4444; border-color: #ff4444;" onclick="window.logout()">تسجيل الخروج</button>
             </div>
         </div>
 
         <div id="admin" class="tab-content">
-            <h2 style="color: var(--gold);">لوحة تحكم المدير</h2>
+            <h2 style="color: var(--gold);">لوحة التحكم الملكية</h2>
             <div id="admin-requests"></div>
-            <button class="btn btn-glass" style="color: #ff4444; border-color: #ff4444;" onclick="window.logout()">خروج</button>
         </div>
 
         <nav class="glass bottom-nav">
-            <div class="nav-item active" onclick="window.tab('shop', this)"><span>🛒</span><small>المتجر</small></div>
-            <div class="nav-item" onclick="window.tab('add', this)"><span>➕</span><small>أنشر</small></div>
-            <div id="admin-btn" class="nav-item" style="display: none;" onclick="window.tab('admin', this)"><span>👑</span><small>المدير</small></div>
+            <div class="nav-item active" onclick="window.tab('shop', this)"><i>🛒</i><small>المتجر</small></div>
+            <div class="nav-item" onclick="window.tab('services', this)"><i>💰</i><small>خدماتي</small></div>
+            <div class="nav-item" onclick="window.tab('add', this)"><i>➕</i><small>أنشر</small></div>
+            <div class="nav-item" onclick="window.tab('profile', this)"><i>👤</i><small>حسابي</small></div>
+            <div id="admin-btn" class="nav-item" style="display: none;" onclick="window.tab('admin', this)"><i>👑</i><small>المدير</small></div>
         </nav>
     </div>
 
@@ -168,101 +166,85 @@
     const ADMIN = "ahmedfouad01278837444@gmail.com";
     let imgData = "";
 
-    // التحقق من الجلسة
     onAuthStateChanged(auth, (user) => {
         if (user) {
             document.getElementById('auth-screen').style.display = 'none';
             document.getElementById('main-app').style.display = 'block';
-            document.getElementById('user-info').innerText = "متصل كـ: " + user.email;
-            if(user.email === ADMIN) { document.getElementById('admin-btn').style.display = 'block'; fetchAdminData(); }
-            fetchLiveShop();
+            document.getElementById('user-mail-display').innerText = user.email;
+            if(user.email === ADMIN) { document.getElementById('admin-btn').style.display = 'block'; fetchAdmin(); }
+            fetchShop();
         } else {
             document.getElementById('auth-screen').style.display = 'flex';
             document.getElementById('main-app').style.display = 'none';
         }
     });
 
-    // تسجيل الدخول
-    window.login = () => signInWithEmailAndPassword(auth, email.value, password.value).catch(e => Swal.fire('خطأ', 'بيانات غير صحيحة', 'error'));
-    window.signup = () => createUserWithEmailAndPassword(auth, email.value, password.value).catch(e => Swal.fire('خطأ', e.message, 'error'));
+    window.login = () => signInWithEmailAndPassword(auth, email.value, password.value).catch(e => Swal.fire('خطأ', 'بيانات الدخول خاطئة', 'error'));
+    window.signup = () => createUserWithEmailAndPassword(auth, email.value, password.value).catch(e => Swal.fire('خطأ', 'البريد مستخدم أو كلمة المرور ضعيفة', 'error'));
     window.logout = () => signOut(auth);
 
-    // تحويل الصورة Base64
     window.handleImg = (e) => {
         const r = new FileReader();
         r.onload = () => imgData = r.result;
         r.readAsDataURL(e.target.files[0]);
     };
 
-    // إرسال للمراجعة (متاح للجميع)
     window.sendToReview = () => {
-        const n = document.getElementById('p-name').value;
-        const p = document.getElementById('p-price').value;
-        if(!n || !p || !imgData) return Swal.fire('عفواً', 'أكمل بيانات المنتج والصورة', 'warning');
-
-        push(ref(db, 'pending'), { name: n, price: p, img: imgData, owner: auth.currentUser.email });
-        Swal.fire('تم الإرسال', 'طلبك قيد المراجعة من HOMOS الآن', 'success');
-        document.getElementById('p-name').value = ''; document.getElementById('p-price').value = '';
+        const n = document.getElementById('p-name').value, p = document.getElementById('p-price').value, d = document.getElementById('p-desc').value, ph = document.getElementById('p-phone').value;
+        if(!n || !p || !imgData || !ph) return Swal.fire('نقص بيانات', 'برجاء إكمال كافة الخانات والصورة', 'warning');
+        push(ref(db, 'pending'), { name: n, price: p, desc: d, phone: ph, img: imgData, owner: auth.currentUser.email });
+        Swal.fire('تم!', 'طلبك قيد المراجعة الآن', 'success');
+        document.getElementById('p-name').value = ''; document.getElementById('p-price').value = ''; document.getElementById('p-desc').value = ''; document.getElementById('p-phone').value = '';
     };
 
-    // جلب المتجر المعتمد
-    function fetchLiveShop() {
+    function fetchShop() {
         onValue(ref(db, 'approved'), (s) => {
-            const list = document.getElementById('products-list');
-            list.innerHTML = '';
+            const list = document.getElementById('products-list'); list.innerHTML = '';
             const val = s.val();
             if(val) {
                 Object.keys(val).reverse().forEach(id => {
                     const i = val[id];
                     list.innerHTML += `
-                        <div class="glass product-card">
+                        <div class="glass card">
                             <img src="${i.img}" class="product-img">
-                            <h3>${i.name}</h3>
-                            <div class="price-tag">${i.price} ج.م</div>
-                            <button class="btn btn-gold" onclick="window.chat('${i.name}')">شراء الآن</button>
-                        </div>`;
-                });
-            } else { list.innerHTML = '<p style="text-align:center; opacity:0.5;">المتجر فارغ حالياً</p>'; }
-        });
-    }
-
-    // جلب طلبات المدير
-    function fetchAdminData() {
-        onValue(ref(db, 'pending'), (s) => {
-            const list = document.getElementById('admin-requests');
-            list.innerHTML = '';
-            const val = s.val();
-            if(val) {
-                Object.keys(val).forEach(id => {
-                    const i = val[id];
-                    list.innerHTML += `
-                        <div class="request-box glass">
-                            <p><b>المنتج:</b> ${i.name} | <b>السعر:</b> ${i.price}</p>
-                            <p style="font-size:0.7rem; opacity:0.6;">من: ${i.owner}</p>
-                            <button class="btn btn-gold" style="padding:5px; font-size:0.8rem;" onclick="window.approve('${id}', ${JSON.stringify(i).replace(/"/g, '&quot;')})">موافقة ونشر</button>
-                            <button class="btn btn-glass" style="padding:5px; font-size:0.8rem; border-color:red; color:red;" onclick="window.del('${id}')">حذف</button>
+                            <h3 style="margin:0;">${i.name}</h3>
+                            <p style="color:#888; font-size:0.85rem; margin:10px 0;">${i.desc || ''}</p>
+                            <div class="price">${i.price} ج.م</div>
+                            <button class="btn btn-gold" onclick="window.chat('شراء ${i.name}')">تواصل للشراء</button>
                         </div>`;
                 });
             }
         });
     }
 
-    window.approve = (id, data) => {
-        push(ref(db, 'approved'), data);
-        remove(ref(db, `pending/${id}`));
-        Swal.fire('تم!', 'المنتج متاح الآن للجميع', 'success');
-    };
+    function fetchAdmin() {
+        onValue(ref(db, 'pending'), (s) => {
+            const list = document.getElementById('admin-requests'); list.innerHTML = '';
+            const val = s.val();
+            if(val) {
+                Object.keys(val).forEach(id => {
+                    const i = val[id];
+                    list.innerHTML += `
+                        <div class="glass request-item">
+                            <p><b>المنتج:</b> ${i.name} | <b>السعر:</b> ${i.price}</p>
+                            <p><b>وصف:</b> ${i.desc}</p>
+                            <p><b>موبايل البائع:</b> ${i.phone}</p>
+                            <button class="btn btn-gold" style="padding:8px; font-size:0.8rem;" onclick="window.approve('${id}', ${JSON.stringify(i).replace(/"/g, '&quot;')})">موافقة</button>
+                            <button class="btn btn-glass" style="padding:8px; font-size:0.8rem; color:red;" onclick="window.del('${id}')">حذف</button>
+                        </div>`;
+                });
+            }
+        });
+    }
 
+    window.approve = (id, data) => { push(ref(db, 'approved'), data); remove(ref(db, `pending/${id}`)); };
     window.del = (id) => remove(ref(db, `pending/${id}`));
-
     window.tab = (id, el) => {
         document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-        el.classList.add('active');
+        document.getElementById(id).classList.add('active'); el.classList.add('active');
     };
-
-    window.chat = (n) => window.open(`https://wa.me/201016553764?text=${encodeURIComponent('أريد شراء: '+n)}`, '_blank');
+    window.chat = (m) => window.open(`https://wa.me/201016553764?text=${encodeURIComponent('HOMOS: '+m)}`, '_blank');
 </script>
 </body>
 </html>
