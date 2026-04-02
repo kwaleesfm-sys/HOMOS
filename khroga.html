@@ -384,15 +384,23 @@
     };
 
     // ميزة مشاركة المنتج المجانية
-    window.shareProduct = (name, price) => {
-        const text = `شوف المنتج ده "${name}" بسعر ${price} ج.م على منصة HOMOS!`;
-        if (navigator.share) {
-            navigator.share({ title: 'HOMOS Platform', text: text, url: window.location.href });
-        } else {
-            navigator.clipboard.writeText(text + " " + window.location.href);
-            Swal.fire('تم النسخ', 'تم نسخ تفاصيل المنتج لمشاركتها', 'success');
-        }
-    };
+    window.shareProduct = (id, name, price) => {
+    // إنشاء رابط يحتوي على معرف المنتج الفريد
+    const shareUrl = `${window.location.origin}${window.location.pathname}?view=${id}`;
+    const text = `شوف المنتج ده "${name}" بسعر ${price} ج.م على منصة HOMOS!`;
+
+    if (navigator.share) {
+        navigator.share({
+            title: 'HOMOS Platform',
+            text: text,
+            url: shareUrl
+        });
+    } else {
+        navigator.clipboard.writeText(text + " " + shareUrl);
+        Swal.fire('تم النسخ', 'تم نسخ رابط المنتج المباشر لمشاركته', 'success');
+    }
+};
+
 
     function fetchShop() {
         onValue(ref(db, 'approved'), (s) => {
@@ -403,24 +411,49 @@
             if(auth.currentUser && auth.currentUser.email === ADMIN) renderAdminShop();
         });
     }
+    // كود لفحص الرابط عند فتح الموقع
+function checkDeepLink() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const productId = urlParams.get('view');
+
+    if (productId) {
+        // الانتظار قليلاً لضمان تحميل المنتجات
+        setTimeout(() => {
+            const product = allProducts.find(p => p.id === productId);
+            if (product) {
+                // فتح نافذة الشراء أو تفاصيل المنتج فوراً
+                window.buyProduct(product.name, product.price);
+                // تنظيف الرابط لكي لا يفتح المنتج كل مرة
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+        }, 1500);
+    }
+}
+
 
     function renderShop(products) {
-        const list = document.getElementById('products-list'); list.innerHTML = '';
-        if(products.length > 0) {
-            products.forEach(i => {
-                let hotBadge = i.hotDeal ? '<span class="hot-deal-badge">سعر لقطة 🔥</span>' : '';
-                list.innerHTML += `
-                    <div class="product-card">
-                        ${hotBadge}
-                        <div class="share-btn" onclick="window.shareProduct('${i.name.replace(/'/g, "\\'")}', ${i.price})">🔗</div>
-                        <img src="${i.img}" class="product-img">
-                        <h3>${i.name}</h3>
-                        <div class="price">${i.price} ج.م</div>
-                        <button class="btn btn-gold btn-sm" onclick="window.buyProduct('${i.name.replace(/'/g, "\\'")}', ${i.price})">شراء الآن</button>
-                    </div>`;
-            });
-        } else { list.innerHTML = '<p style="text-align:center; color:#666; grid-column: span 2;">لا توجد منتجات مطابقة حالياً</p>'; }
+    const list = document.getElementById('products-list'); 
+    list.innerHTML = '';
+    
+    if(products.length > 0) {
+        products.forEach(i => {
+            let hotBadge = i.hotDeal ? '<span class="hot-deal-badge">سعر لقطة 🔥</span>' : '';
+            
+            list.innerHTML += `
+                <div class="product-card">
+                    ${hotBadge}
+                    <div class="share-btn" onclick="window.shareProduct('${i.id}', '${i.name.replace(/'/g, "\\'")}', ${i.price})">🔗</div>
+                    
+                    <img src="${i.img}" class="product-img">
+                    <h3>${i.name}</h3>
+                    <div class="price">${i.price} ج.م</div>
+                    <button class="btn btn-gold btn-sm" onclick="window.buyProduct('${i.name.replace(/'/g, "\\'")}', ${i.price})">شراء الآن</button>
+                </div>`;
+        });
+    } else { 
+        list.innerHTML = '<p style="text-align:center; color:#666; grid-column: span 2;">لا توجد منتجات مطابقة حالياً</p>'; 
     }
+}
 
     window.filterShop = () => {
         const query = document.getElementById('smartSearch').value.toLowerCase();
