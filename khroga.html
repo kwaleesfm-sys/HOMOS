@@ -61,7 +61,7 @@
         .product-img { width: 100%; height: 230px; object-fit: cover; border-radius: 20px; margin-bottom: 15px; }
         .price { color: var(--gold); font-size: 1.6rem; font-weight: 800; margin: 5px 0; }
         
-        /* شريط التنقل السفلي - 5 خانات */
+        /* شريط التنقل السفلي */
         .bottom-nav {
             position: fixed; bottom: 20px; left: 15px; right: 15px;
             height: 75px; display: flex; justify-content: space-around;
@@ -72,7 +72,7 @@
         .nav-item i { font-size: 1.4rem; display: block; margin-bottom: 4px; }
         .nav-item small { font-size: 0.65rem; font-weight: 500; }
 
-        /* لوحة التحكم */
+        .wallet-box { background: rgba(255,215,0,0.1); border: 1px solid var(--gold); border-radius: 15px; padding: 15px; margin: 15px 0; }
         .request-item { background: rgba(255,215,0,0.03); border-right: 4px solid var(--gold); margin-bottom: 15px; padding: 15px; }
     </style>
 </head>
@@ -84,7 +84,7 @@
             <input type="email" id="email" placeholder="البريد الإلكتروني">
             <input type="password" id="password" placeholder="كلمة المرور">
             <button class="btn btn-gold" onclick="window.login()">دخول للأعمال</button>
-            <button class="btn btn-glass" onclick="window.signup()">عضوية إمبراطورية</button>
+            <button class="btn btn-glass" onclick="window.signup()">عضوية إمبراطورية جديدة</button>
         </div>
     </div>
 
@@ -101,11 +101,6 @@
                 <h3 style="color: var(--gold);">💰 استثمر الآن</h3>
                 <p style="color: #aaa;">شارك في دورات HOMOS التجارية بضمانات حقيقية وأرباح مجزية.</p>
                 <button class="btn btn-gold" onclick="window.chat('استثمار')">ابدأ الاستثمار</button>
-            </div>
-            <div class="glass card" style="text-align: center;">
-                <h3 style="color: var(--gold);">💳 طلب تمويل</h3>
-                <p style="color: #aaa;">قروض حسنة وتقسيط للمنتجات بضمان البطاقة الشخصية.</p>
-                <button class="btn btn-glass" onclick="window.chat('تمويل')">اطلب تمويلك</button>
             </div>
         </div>
 
@@ -126,7 +121,20 @@
             <div class="glass card" style="text-align: center;">
                 <div style="width: 80px; height: 80px; background: var(--gold); border-radius: 50%; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; color: #000; font-size: 2rem; font-weight: 800;">H</div>
                 <h3 id="user-mail-display">المستخدم</h3>
-                <p style="color: #666; font-size: 0.9rem;">عضو في إمبراطورية HOMOS</p>
+                
+                <div class="wallet-box">
+                    <h4 style="margin: 0; color: #aaa;">رصيد المحفظة</h4>
+                    <h2 style="margin: 10px 0; color: var(--gold);"><span id="wallet-balance">0</span> ج.م</h2>
+                    <p style="font-size: 0.8rem; margin: 0;">كود الإحالة الخاص بك: <b id="my-ref-code" style="color: #fff; letter-spacing: 1px;">---</b></p>
+                    <button class="btn btn-glass" style="padding: 10px; margin-top: 10px; font-size: 0.9rem;" onclick="window.copyRef()">نسخ الكود للربح</button>
+                </div>
+
+                <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px; margin-bottom: 20px;">
+                    <p style="font-size: 0.85rem; margin-top: 0;">هل دعاك صديق؟ أدخل كود الإحالة الخاص به لتربحوا معاً!</p>
+                    <input type="text" id="friend-ref" placeholder="كود الصديق">
+                    <button class="btn btn-gold" style="padding: 10px;" onclick="window.applyRef()">تفعيل كود الصديق</button>
+                </div>
+
                 <hr style="border: 0.5px solid var(--glass-border); margin: 20px 0;">
                 <button class="btn btn-glass" style="color: #ff4444; border-color: #ff4444;" onclick="window.logout()">تسجيل الخروج</button>
             </div>
@@ -134,6 +142,15 @@
 
         <div id="admin" class="tab-content">
             <h2 style="color: var(--gold);">لوحة التحكم الملكية</h2>
+            
+            <div class="glass card">
+                <h3>🎟️ إنشاء كود خصم جديد</h3>
+                <input type="text" id="new-promo-code" placeholder="اسم الكود (مثال: KUBRA10)" style="text-transform: uppercase;">
+                <input type="number" id="new-promo-val" placeholder="قيمة الخصم (ج.م)">
+                <button class="btn btn-gold" onclick="window.createPromo()">تفعيل الكود</button>
+            </div>
+
+            <h3 style="margin-top: 30px;">📦 طلبات المنتجات المعلقة</h3>
             <div id="admin-requests"></div>
         </div>
 
@@ -149,7 +166,7 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-    import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+    import { getDatabase, ref, push, onValue, remove, get, set, update } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyAhg6oTG1EJ44ST1zkkeYvKpfLMD2JDV3M",
@@ -166,12 +183,29 @@
     const db = getDatabase(app);
     const ADMIN = "ahmedfouad01278837444@gmail.com";
     let imgData = "";
+    let currentUserData = null;
 
-    onAuthStateChanged(auth, (user) => {
+    onAuthStateChanged(auth, async (user) => {
         if (user) {
             document.getElementById('auth-screen').style.display = 'none';
             document.getElementById('main-app').style.display = 'block';
             document.getElementById('user-mail-display').innerText = user.email;
+            
+            // نظام حسابات المستخدمين والمحفظة
+            const userRef = ref(db, `users/${user.uid}`);
+            onValue(userRef, (snapshot) => {
+                if(!snapshot.exists()) {
+                    // إنشاء حساب جديد مع كود إحالة
+                    const refCode = user.email.split('@')[0].substring(0,4).toUpperCase() + Math.floor(100 + Math.random()*900);
+                    set(userRef, { email: user.email, wallet: 0, refCode: refCode, usedRef: false });
+                    set(ref(db, `refCodes/${refCode}`), user.uid);
+                } else {
+                    currentUserData = snapshot.val();
+                    document.getElementById('wallet-balance').innerText = currentUserData.wallet || 0;
+                    document.getElementById('my-ref-code').innerText = currentUserData.refCode;
+                }
+            });
+
             if(user.email === ADMIN) { document.getElementById('admin-btn').style.display = 'block'; fetchAdmin(); }
             fetchShop();
         } else {
@@ -193,9 +227,51 @@
     window.sendToReview = () => {
         const n = document.getElementById('p-name').value, p = document.getElementById('p-price').value, d = document.getElementById('p-desc').value, ph = document.getElementById('p-phone').value;
         if(!n || !p || !imgData || !ph) return Swal.fire('نقص بيانات', 'برجاء إكمال كافة الخانات والصورة', 'warning');
-        push(ref(db, 'pending'), { name: n, price: p, desc: d, phone: ph, img: imgData, owner: auth.currentUser.email });
-        Swal.fire('تم!', 'طلبك قيد المراجعة الآن', 'success');
+        push(ref(db, 'pending'), { name: n, price: parseFloat(p), desc: d, phone: ph, img: imgData, owner: auth.currentUser.email });
+        Swal.fire('تم!', 'طلبك قيد المراجعة الآن من الإدارة', 'success');
         document.getElementById('p-name').value = ''; document.getElementById('p-price').value = ''; document.getElementById('p-desc').value = ''; document.getElementById('p-phone').value = '';
+    };
+
+    // نظام الشراء الذكي مع أكواد الخصم
+    window.buyProduct = async (name, price) => {
+        const { value: formValues } = await Swal.fire({
+            title: `شراء ${name}`,
+            html: `
+                <h3 style="color:#000;">السعر: ${price} ج.م</h3>
+                <p style="font-size:0.9rem; color:#555;">هل تملك كود خصم؟ أدخله هنا (اختياري)</p>
+                <input id="swal-promo" class="swal2-input" placeholder="كود الخصم" style="text-transform: uppercase;">
+            `,
+            focusConfirm: false,
+            showCancelButton: true,
+            confirmButtonText: 'إتمام الشراء',
+            cancelButtonText: 'إلغاء',
+            preConfirm: () => {
+                return document.getElementById('swal-promo').value.toUpperCase();
+            }
+        });
+
+        if (formValues !== undefined) {
+            let finalPrice = price;
+            let promoMsg = "";
+            let promoCode = formValues.trim();
+
+            if(promoCode) {
+                const promoSnap = await get(ref(db, `promos/${promoCode}`));
+                if(promoSnap.exists()) {
+                    const discount = promoSnap.val().discount;
+                    finalPrice = price - discount;
+                    if(finalPrice < 0) finalPrice = 0;
+                    promoMsg = `%0A🎟️ *تم استخدام كود خصم:* ${promoCode}%0A💰 *الخصم:* ${discount} ج.م`;
+                    await Swal.fire('مبروك!', `تم تطبيق الخصم. السعر النهائي: ${finalPrice} ج.م`, 'success');
+                } else {
+                    await Swal.fire('عذراً', 'كود الخصم غير صحيح أو منتهي', 'error');
+                    return;
+                }
+            }
+            
+            const msg = `HOMOS PLATFORM%0A🛍️ *طلب شراء:* ${name}%0A💵 *السعر النهائي:* ${finalPrice} ج.م${promoMsg}`;
+            window.open(`https://wa.me/201016553764?text=${msg}`, '_blank');
+        }
     };
 
     function fetchShop() {
@@ -211,12 +287,53 @@
                             <h3 style="margin:0;">${i.name}</h3>
                             <p style="color:#888; font-size:0.85rem; margin:10px 0;">${i.desc || ''}</p>
                             <div class="price">${i.price} ج.م</div>
-                            <button class="btn btn-gold" onclick="window.chat('شراء ${i.name}')">تواصل للشراء</button>
+                            <button class="btn btn-gold" onclick="window.buyProduct('${i.name.replace(/'/g, "\\'")}', ${i.price})">شراء الآن</button>
                         </div>`;
                 });
             }
         });
     }
+
+    // نظام الإحالة والمحفظة
+    window.copyRef = () => {
+        const code = document.getElementById('my-ref-code').innerText;
+        navigator.clipboard.writeText(code);
+        Swal.fire({icon: 'success', title: 'تم النسخ!', text: 'أرسل الكود لأصدقائك لتربحوا معاً', timer: 1500});
+    };
+
+    window.applyRef = async () => {
+        const friendCode = document.getElementById('friend-ref').value.toUpperCase().trim();
+        if(!friendCode) return Swal.fire('خطأ', 'أدخل الكود أولاً', 'error');
+        if(currentUserData.usedRef) return Swal.fire('عذراً', 'لقد قمت باستخدام كود إحالة من قبل', 'warning');
+        if(friendCode === currentUserData.refCode) return Swal.fire('خطأ', 'لا يمكنك استخدام كودك الخاص', 'error');
+
+        const codeSnap = await get(ref(db, `refCodes/${friendCode}`));
+        if(codeSnap.exists()) {
+            const friendUid = codeSnap.val();
+            // إضافة رصيد للصديق (50 جنيه مثلاً)
+            const friendWalletSnap = await get(ref(db, `users/${friendUid}/wallet`));
+            await update(ref(db, `users/${friendUid}`), { wallet: (friendWalletSnap.val() || 0) + 50 });
+            
+            // إضافة رصيد للمستخدم الحالي وتسجيل أنه استخدم كود
+            await update(ref(db, `users/${auth.currentUser.uid}`), { wallet: (currentUserData.wallet || 0) + 50, usedRef: true });
+            
+            Swal.fire('تم بنجاح!', 'تم إضافة 50 ج.م لمحفظتك ومحفظة صديقك!', 'success');
+            document.getElementById('friend-ref').value = '';
+        } else {
+            Swal.fire('خطأ', 'كود الإحالة غير صحيح', 'error');
+        }
+    };
+
+    // لوحة تحكم المدير
+    window.createPromo = async () => {
+        const code = document.getElementById('new-promo-code').value.toUpperCase().trim();
+        const val = parseInt(document.getElementById('new-promo-val').value);
+        if(!code || !val) return Swal.fire('خطأ', 'أكمل بيانات الكود', 'error');
+        
+        await set(ref(db, `promos/${code}`), { discount: val });
+        Swal.fire('تم', `تم تفعيل الكود ${code} بخصم ${val} ج.م`, 'success');
+        document.getElementById('new-promo-code').value = ''; document.getElementById('new-promo-val').value = '';
+    };
 
     function fetchAdmin() {
         onValue(ref(db, 'pending'), (s) => {
@@ -230,16 +347,19 @@
                             <p><b>المنتج:</b> ${i.name} | <b>السعر:</b> ${i.price}</p>
                             <p><b>وصف:</b> ${i.desc}</p>
                             <p><b>موبايل البائع:</b> ${i.phone}</p>
-                            <button class="btn btn-gold" style="padding:8px; font-size:0.8rem;" onclick="window.approve('${id}', ${JSON.stringify(i).replace(/"/g, '&quot;')})">موافقة</button>
-                            <button class="btn btn-glass" style="padding:8px; font-size:0.8rem; color:red;" onclick="window.del('${id}')">حذف</button>
+                            <button class="btn btn-gold" style="padding:8px; font-size:0.8rem;" onclick="window.approve('${id}', ${JSON.stringify(i).replace(/"/g, '&quot;')})">موافقة ونشر</button>
+                            <button class="btn btn-glass" style="padding:8px; font-size:0.8rem; color:red;" onclick="window.del('${id}')">رفض وحذف</button>
                         </div>`;
                 });
+            } else {
+                list.innerHTML = '<p style="color:#888; text-align:center;">لا توجد طلبات معلقة</p>';
             }
         });
     }
 
-    window.approve = (id, data) => { push(ref(db, 'approved'), data); remove(ref(db, `pending/${id}`)); };
-    window.del = (id) => remove(ref(db, `pending/${id}`));
+    window.approve = (id, data) => { push(ref(db, 'approved'), data); remove(ref(db, `pending/${id}`)); Swal.fire('تم', 'تم نشر المنتج بالمتجر', 'success'); };
+    window.del = (id) => { remove(ref(db, `pending/${id}`)); Swal.fire('تم', 'تم حذف الطلب', 'info'); };
+    
     window.tab = (id, el) => {
         document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
