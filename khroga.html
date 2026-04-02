@@ -393,5 +393,14 @@
     };
     window.chat = (m) => window.open(`https://wa.me/201016553764?text=${encodeURIComponent('HOMOS: '+m)}`, '_blank');
 </script>
+    <script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./service-worker.js')
+        .then(reg => console.log('Service Worker Registered'))
+        .catch(err => console.log('Service Worker Failed', err));
+    });
+  }
+</script>
 </body>
 </html>
