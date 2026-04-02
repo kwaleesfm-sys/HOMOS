@@ -30,15 +30,28 @@
         .btn-gold { background: linear-gradient(90deg, #FFD700, #FFB800); color: #000; }
         .btn-glass { background: var(--glass); color: #fff; border: 1px solid var(--glass-border); }
 
+        /* الهيدر ونظام الإشعارات */
+        .top-header { position: sticky; top: 0; background: rgba(2,2,2,0.9); backdrop-filter: blur(10px); z-index: 1000; display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; border-bottom: 1px solid var(--glass-border); }
+        .top-header h2 { margin: 0; color: var(--gold); font-size: 1.5rem; letter-spacing: 1px; }
+        .notification-bell { position: relative; font-size: 1.5rem; cursor: pointer; }
+        .notification-badge { position: absolute; top: -5px; right: -5px; background: red; color: white; border-radius: 50%; padding: 2px 6px; font-size: 0.6rem; font-weight: bold; display: none; }
+        
+        #notifications-modal { display: none; position: fixed; top: 70px; right: 20px; left: 20px; max-height: 400px; overflow-y: auto; z-index: 2001; padding: 15px; }
+        .notif-item { padding: 10px; border-bottom: 1px solid var(--glass-border); margin-bottom: 10px; }
+        .notif-item h4 { margin: 0 0 5px 0; color: var(--gold); font-size: 0.95rem; }
+        .notif-item p { margin: 0; font-size: 0.8rem; color: #ccc; }
+        .notif-item small { display: block; margin-top: 5px; color: #666; font-size: 0.7rem; }
+
         /* التطبيق الرئيسي */
         #main-app { display: none; padding: 15px; }
         .tab-content { display: none; animation: fadeIn 0.4s ease; }
         .tab-content.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* --- التعديلات الجديدة للتصميم --- */
+        /* محرك البحث */
         .search-bar { width: 100%; padding: 12px 20px; border-radius: 20px; background: var(--glass); border: 1px solid var(--gold); color: #fff; outline: none; margin-bottom: 15px; }
         
+        /* الكروت المتجر */
         #products-list { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .product-card { background: var(--glass); border: 1px solid var(--glass-border); border-radius: 15px; overflow: hidden; position: relative; display: flex; flex-direction: column; padding: 10px; }
         .product-card .product-img { width: 100%; height: 140px; object-fit: cover; border-radius: 10px; margin-bottom: 10px; }
@@ -46,9 +59,11 @@
         .product-card .price { color: var(--gold); font-size: 1.2rem; font-weight: 800; margin: 5px 0; }
         .btn-sm { padding: 8px; font-size: 0.9rem; margin: auto 0 0 0; }
         
-        .hot-deal-badge { position: absolute; top: 5px; right: 5px; background: linear-gradient(45deg, #ff416c, #ff4b2b); color: white; padding: 3px 8px; border-radius: 5px; font-size: 0.7rem; font-weight: 800; animation: pulse 1.5s infinite; z-index: 10; box-shadow: 0 2px 10px rgba(255,65,108,0.5); }
+        /* ميزة المشاركة الإضافية */
+        .share-btn { position: absolute; top: 15px; left: 15px; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; z-index: 10; cursor: pointer; border: 1px solid var(--glass-border); }
+        
+        .hot-deal-badge { position: absolute; top: 15px; right: 15px; background: linear-gradient(45deg, #ff416c, #ff4b2b); color: white; padding: 3px 8px; border-radius: 5px; font-size: 0.7rem; font-weight: 800; animation: pulse 1.5s infinite; z-index: 10; box-shadow: 0 2px 10px rgba(255,65,108,0.5); }
         @keyframes pulse { 0% {transform: scale(1);} 50% {transform: scale(1.05);} 100% {transform: scale(1);} }
-        /* --------------------------------- */
 
         .card { padding: 20px; margin-bottom: 20px; position: relative;}
         
@@ -75,10 +90,22 @@
         </div>
     </div>
 
+    <div id="main-header" class="top-header" style="display: none;">
+        <h2>HOMOS</h2>
+        <div class="notification-bell" onclick="window.toggleNotifications()">
+            🔔<span id="notif-badge" class="notification-badge">0</span>
+        </div>
+    </div>
+
+    <div id="notifications-modal" class="glass">
+        <h3 style="color:var(--gold); margin-top:0; border-bottom:1px solid #333; padding-bottom:10px;">الإشعارات</h3>
+        <div id="notif-list"></div>
+        <button class="btn btn-glass" style="padding: 10px; margin-top: 10px;" onclick="window.toggleNotifications()">إغلاق</button>
+    </div>
+
     <div id="main-app">
         
         <div id="shop" class="tab-content active">
-            <h2 style="color: var(--gold); text-align: center; letter-spacing: 2px;">MARKETPLACE</h2>
             <input type="text" id="smartSearch" class="search-bar" placeholder="ابحث عن منتج، لقطة..." oninput="window.filterShop()">
             <div id="products-list"></div>
         </div>
@@ -132,7 +159,14 @@
         <div id="admin" class="tab-content">
             <h2 style="color: var(--gold);">لوحة الإدارة (المنصة)</h2>
             
-            <div class="glass card">
+            <div class="glass card" style="border-left: 4px solid #00f2fe;">
+                <h3>📣 إرسال إشعار للجميع</h3>
+                <input type="text" id="admin-notif-title" placeholder="عنوان الإشعار (مثال: خصم خاص اليوم!)">
+                <textarea id="admin-notif-body" rows="2" placeholder="تفاصيل الإشعار..."></textarea>
+                <button class="btn btn-glass" style="color:#00f2fe; border-color:#00f2fe;" onclick="window.sendCustomNotif()">إرسال الإشعار 🚀</button>
+            </div>
+
+            <div class="glass card" style="margin-top: 20px;">
                 <h3>🎟️ إنشاء كود خصم</h3>
                 <input type="text" id="new-promo-code" placeholder="الكود (مثال: KUBRA)" style="text-transform: uppercase;">
                 <input type="number" id="new-promo-val" placeholder="نسبة الخصم المئوية (مثال: 10)">
@@ -156,7 +190,6 @@
     </div>
 
 <script type="module">
-    // ================= 1. إعدادات Firebase والتهيئة =================
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
     import { getDatabase, ref, push, onValue, remove, get, set, update } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
@@ -177,13 +210,14 @@
     const ADMIN = "ahmedfouad01278837444@gmail.com";
     let imgData = "";
     let currentUserData = null;
-    let allProducts = []; // مصفوفة لتخزين المنتجات للبحث السريع
+    let allProducts = [];
 
     // ================= 2. نظام المصادقة ومعالجة الحسابات =================
     onAuthStateChanged(auth, async (user) => {
         if (user) {
             document.getElementById('auth-screen').style.display = 'none';
             document.getElementById('main-app').style.display = 'block';
+            document.getElementById('main-header').style.display = 'flex'; // إظهار الهيدر
             document.getElementById('user-mail-display').innerText = user.email;
             
             const userRef = ref(db, `users/${user.uid}`);
@@ -195,12 +229,9 @@
                 const refCode = namePart + randomPart;
                 
                 const updateData = { 
-                    email: user.email, 
-                    wallet: snapshot.exists() ? (snapshot.val().wallet || 0) : 0, 
-                    refCode: refCode, 
-                    usedRef: snapshot.exists() ? (snapshot.val().usedRef || false) : false 
+                    email: user.email, wallet: snapshot.exists() ? (snapshot.val().wallet || 0) : 0, 
+                    refCode: refCode, usedRef: snapshot.exists() ? (snapshot.val().usedRef || false) : false 
                 };
-                
                 await update(userRef, updateData);
                 await set(ref(db, `refCodes/${refCode}`), user.uid);
             }
@@ -215,9 +246,11 @@
 
             if(user.email === ADMIN) { document.getElementById('admin-btn').style.display = 'block'; fetchAdmin(); }
             fetchShop();
+            fetchNotifications(); // جلب الإشعارات
         } else {
             document.getElementById('auth-screen').style.display = 'flex';
             document.getElementById('main-app').style.display = 'none';
+            document.getElementById('main-header').style.display = 'none';
         }
     });
 
@@ -225,7 +258,50 @@
     window.signup = () => createUserWithEmailAndPassword(auth, email.value, password.value).catch(e => Swal.fire('خطأ', 'البريد مستخدم أو كلمة المرور ضعيفة', 'error'));
     window.logout = () => signOut(auth);
 
-    // ================= 3. نظام الإضافة والشراء (البيزنس) =================
+    // ================= 3. نظام الإشعارات الداخلي =================
+    window.toggleNotifications = () => {
+        const modal = document.getElementById('notifications-modal');
+        if (modal.style.display === 'block') { modal.style.display = 'none'; } 
+        else {
+            modal.style.display = 'block';
+            document.getElementById('notif-badge').style.display = 'none'; // تصفير العداد عند الفتح
+            localStorage.setItem('lastReadNotif', Date.now()); // حفظ وقت آخر قراءة
+        }
+    };
+
+    function fetchNotifications() {
+        onValue(ref(db, 'notifications'), (snap) => {
+            const list = document.getElementById('notif-list');
+            list.innerHTML = '';
+            const vals = snap.val();
+            let unreadCount = 0;
+            const lastRead = localStorage.getItem('lastReadNotif') || 0;
+
+            if(vals) {
+                const notifsArray = Object.keys(vals).map(k => vals[k]).sort((a,b) => b.timestamp - a.timestamp); // الأحدث أولاً
+                
+                notifsArray.forEach(n => {
+                    if (n.timestamp > lastRead) unreadCount++;
+                    const date = new Date(n.timestamp).toLocaleDateString('ar-EG', {hour: '2-digit', minute:'2-digit'});
+                    list.innerHTML += `
+                        <div class="notif-item glass">
+                            <h4>${n.title}</h4>
+                            <p>${n.body}</p>
+                            <small>${date}</small>
+                        </div>`;
+                });
+
+                if (unreadCount > 0) {
+                    document.getElementById('notif-badge').innerText = unreadCount;
+                    document.getElementById('notif-badge').style.display = 'block';
+                }
+            } else {
+                list.innerHTML = '<p style="text-align:center; color:#888;">لا توجد إشعارات</p>';
+            }
+        });
+    }
+
+    // ================= 4. نظام الشراء والمشاركة (البيزنس) =================
     window.handleImg = (e) => { const r = new FileReader(); r.onload = () => imgData = r.result; r.readAsDataURL(e.target.files[0]); };
 
     window.sendToReview = () => {
@@ -238,6 +314,7 @@
 
     window.buyProduct = async (name, price) => {
         let currentWallet = currentUserData.wallet || 0;
+        const usedPromos = currentUserData.usedPromos || {}; // التحقق من الأكواد المستخدمة سابقاً للمستخدم الحالي
         
         const { value: formValues } = await Swal.fire({
             title: `إتمام الشراء`,
@@ -263,15 +340,22 @@
         if (formValues) {
             let finalPrice = price;
             let msgDetails = `%0A🛍️ *طلب شراء:* ${name}%0A💵 *السعر الأساسي:* ${price} ج.م`;
+            let updatesToUser = {};
 
-            // 1. تطبيق كود الخصم كنسبة مئوية
+            // 1. تطبيق كود الخصم كنسبة مئوية واستخدامه مرة واحدة
             if(formValues.promo) {
+                if(usedPromos[formValues.promo]) {
+                    await Swal.fire('عذراً', 'لقد قمت باستخدام كود الخصم هذا من قبل', 'error');
+                    return;
+                }
+
                 const promoSnap = await get(ref(db, `promos/${formValues.promo}`));
                 if(promoSnap.exists()) {
-                    const discountPercent = promoSnap.val().discount; // النسبة المئوية
-                    const discountAmount = finalPrice * (discountPercent / 100); // حساب قيمة الخصم
+                    const discountPercent = promoSnap.val().discount;
+                    const discountAmount = finalPrice * (discountPercent / 100);
                     finalPrice = finalPrice - discountAmount;
                     msgDetails += `%0A🎟️ *كود خصم:* تم خصم ${discountPercent}% (-${discountAmount} ج.م)`;
+                    updatesToUser[`usedPromos/${formValues.promo}`] = true; // تسجيل الكود كـ "تم الاستخدام"
                 } else {
                     await Swal.fire('عذراً', 'كود الخصم غير صحيح', 'error'); return;
                 }
@@ -282,73 +366,71 @@
             if(formValues.useWallet && currentWallet > 0) {
                 walletDeducted = Math.min(finalPrice, currentWallet); 
                 finalPrice = finalPrice - walletDeducted;
-                await update(ref(db, `users/${auth.currentUser.uid}`), { wallet: currentWallet - walletDeducted });
+                updatesToUser['wallet'] = currentWallet - walletDeducted; // تسجيل خصم المحفظة
                 msgDetails += `%0A💼 *خصم المحفظة:* تم خصم ${walletDeducted} ج.م`;
             }
 
             if(finalPrice < 0) finalPrice = 0;
             msgDetails += `%0A✅ *المطلوب دفعه نهائياً:* ${finalPrice} ج.م`;
 
+            // تنفيذ تحديثات قاعدة البيانات للمستخدم (المحفظة + الكود المستخدم)
+            if(Object.keys(updatesToUser).length > 0) {
+                await update(ref(db, `users/${auth.currentUser.uid}`), updatesToUser);
+            }
+
             await Swal.fire('تم تأكيد الطلب!', `سيتم تحويلك للواتساب لإتمام العملية. الإجمالي النهائي: ${finalPrice} ج.م`, 'success');
             window.open(`https://wa.me/201016553764?text=${msgDetails}`, '_blank');
         }
     };
 
-    // جلب المنتجات وتخزينها للمحرك الذكي
+    // ميزة مشاركة المنتج المجانية
+    window.shareProduct = (name, price) => {
+        const text = `شوف المنتج ده "${name}" بسعر ${price} ج.م على منصة HOMOS!`;
+        if (navigator.share) {
+            navigator.share({ title: 'HOMOS Platform', text: text, url: window.location.href });
+        } else {
+            navigator.clipboard.writeText(text + " " + window.location.href);
+            Swal.fire('تم النسخ', 'تم نسخ تفاصيل المنتج لمشاركتها', 'success');
+        }
+    };
+
     function fetchShop() {
         onValue(ref(db, 'approved'), (s) => {
             allProducts = [];
             const val = s.val();
-            if(val) {
-                Object.keys(val).reverse().forEach(id => {
-                    allProducts.push({ id, ...val[id] });
-                });
-            }
+            if(val) { Object.keys(val).reverse().forEach(id => { allProducts.push({ id, ...val[id] }); }); }
             renderShop(allProducts);
-            // تحديث لوحة تحكم الإدارة (حذف المنتجات) إذا كان المستخدم هو المدير
             if(auth.currentUser && auth.currentUser.email === ADMIN) renderAdminShop();
         });
     }
 
-    // عرض المنتجات في المتجر
     function renderShop(products) {
-        const list = document.getElementById('products-list'); 
-        list.innerHTML = '';
+        const list = document.getElementById('products-list'); list.innerHTML = '';
         if(products.length > 0) {
             products.forEach(i => {
                 let hotBadge = i.hotDeal ? '<span class="hot-deal-badge">سعر لقطة 🔥</span>' : '';
                 list.innerHTML += `
                     <div class="product-card">
                         ${hotBadge}
+                        <div class="share-btn" onclick="window.shareProduct('${i.name.replace(/'/g, "\\'")}', ${i.price})">🔗</div>
                         <img src="${i.img}" class="product-img">
                         <h3>${i.name}</h3>
                         <div class="price">${i.price} ج.م</div>
                         <button class="btn btn-gold btn-sm" onclick="window.buyProduct('${i.name.replace(/'/g, "\\'")}', ${i.price})">شراء الآن</button>
                     </div>`;
             });
-        } else {
-            list.innerHTML = '<p style="text-align:center; color:#666; grid-column: span 2;">لا توجد منتجات مطابقة حالياً</p>';
-        }
+        } else { list.innerHTML = '<p style="text-align:center; color:#666; grid-column: span 2;">لا توجد منتجات مطابقة حالياً</p>'; }
     }
 
-    // محرك البحث الذكي
     window.filterShop = () => {
         const query = document.getElementById('smartSearch').value.toLowerCase();
-        const filtered = allProducts.filter(p => 
-            p.name.toLowerCase().includes(query) || 
-            (p.desc && p.desc.toLowerCase().includes(query)) ||
-            (p.hotDeal && 'لقطة'.includes(query))
-        );
+        const filtered = allProducts.filter(p => p.name.toLowerCase().includes(query) || (p.desc && p.desc.toLowerCase().includes(query)) || (p.hotDeal && 'لقطة'.includes(query)));
         renderShop(filtered);
     };
 
-    // ================= 4. نظام الإحالة (المعدل لحماية المنصة) =================
-    window.copyRef = () => {
-        navigator.clipboard.writeText(document.getElementById('my-ref-code').innerText);
-        Swal.fire({icon: 'success', title: 'تم النسخ!', text: 'أرسل الكود، ستربح 10 ج.م وصديقك 5 ج.م', timer: 2000});
-    };
-
-    window.applyRef = async () => {
+    // ================= 5. نظام الإحالة =================
+    window.copyRef = () => { navigator.clipboard.writeText(document.getElementById('my-ref-code').innerText); Swal.fire({icon: 'success', title: 'تم النسخ!', timer: 1500}); };
+    window.applyRef = async () => { /* نفس الكود السابق الخاص بالإحالة */
         const friendCode = document.getElementById('friend-ref').value.toUpperCase().trim();
         if(!friendCode) return Swal.fire('خطأ', 'أدخل الكود أولاً', 'error');
         if(currentUserData.usedRef) return Swal.fire('عذراً', 'استخدمت كود إحالة سابقاً', 'warning');
@@ -360,20 +442,27 @@
             const friendWalletSnap = await get(ref(db, `users/${friendUid}/wallet`));
             await update(ref(db, `users/${friendUid}`), { wallet: (friendWalletSnap.val() || 0) + 10 });
             await update(ref(db, `users/${auth.currentUser.uid}`), { wallet: (currentUserData.wallet || 0) + 5, usedRef: true });
-            
             Swal.fire('مبروك!', 'تم تفعيل الكود وربحت 5 ج.م في محفظتك!', 'success');
             document.getElementById('friend-ref').value = '';
         } else { Swal.fire('خطأ', 'كود الإحالة غير صحيح', 'error'); }
     };
 
-    // ================= 5. لوحة تحكم المدير الملكية =================
+    // ================= 6. لوحة تحكم المدير الملكية =================
     window.createPromo = async () => {
-        const code = document.getElementById('new-promo-code').value.toUpperCase().trim();
-        const val = parseInt(document.getElementById('new-promo-val').value);
-        if(!code || !val) return Swal.fire('خطأ', 'أكمل بيانات الكود', 'error');
+        const code = document.getElementById('new-promo-code').value.toUpperCase().trim(), val = parseInt(document.getElementById('new-promo-val').value);
+        if(!code || !val) return Swal.fire('خطأ', 'أكمل البيانات', 'error');
         await set(ref(db, `promos/${code}`), { discount: val });
         Swal.fire('تم', `تفعيل كود ${code} بخصم ${val}%`, 'success');
-        document.getElementById('new-promo-code').value = ''; document.getElementById('new-promo-val').value = '';
+    };
+
+    // ميزة إرسال الإشعارات المخصصة من المدير
+    window.sendCustomNotif = () => {
+        const title = document.getElementById('admin-notif-title').value;
+        const body = document.getElementById('admin-notif-body').value;
+        if(!title || !body) return Swal.fire('خطأ', 'اكتب العنوان والتفاصيل', 'error');
+        push(ref(db, 'notifications'), { title: title, body: body, timestamp: Date.now() });
+        Swal.fire('تم الإرسال', 'تم إرسال الإشعار لجميع المستخدمين بنجاح', 'success');
+        document.getElementById('admin-notif-title').value = ''; document.getElementById('admin-notif-body').value = '';
     };
 
     function fetchAdmin() {
@@ -386,75 +475,58 @@
                     const safeData = JSON.stringify(i).replace(/'/g, "&apos;").replace(/"/g, "&quot;");
                     list.innerHTML += `
                         <div class="glass request-item">
-                            <p><b>المنتج:</b> ${i.name}</p>
-                            <p><b>سعر البائع:</b> <span style="color:red; font-weight:bold;">${i.price} ج.م</span></p>
+                            <p><b>المنتج:</b> ${i.name} - <span style="color:red;">${i.price} ج.م</span></p>
                             <p><b>وصف:</b> ${i.desc}</p>
                             <div style="display:flex; gap:5px; margin-top:10px;">
-                                <button class="btn btn-gold" style="padding:8px; font-size:0.8rem; flex:1;" onclick='window.approve("${id}", ${safeData}, false)'>✅ موافقة عادية</button>
-                                <button class="btn" style="padding:8px; font-size:0.8rem; flex:1; background: #ff4b2b; color: #fff;" onclick='window.approve("${id}", ${safeData}, true)'>🔥 سعر لقطة</button>
+                                <button class="btn btn-gold" style="padding:8px; font-size:0.8rem; flex:1;" onclick='window.approve("${id}", ${safeData}, false)'>✅ موافقة</button>
+                                <button class="btn" style="padding:8px; font-size:0.8rem; flex:1; background: #ff4b2b; color: #fff;" onclick='window.approve("${id}", ${safeData}, true)'>🔥 لقطة</button>
                             </div>
-                            <button class="btn btn-glass" style="padding:8px; font-size:0.8rem; color:#ff4444; width:100%; margin-top:5px;" onclick='window.del("${id}")'>❌ رفض وحذف</button>
+                            <button class="btn btn-glass" style="padding:8px; font-size:0.8rem; color:#ff4444; width:100%; margin-top:5px;" onclick='window.del("${id}")'>❌ حذف</button>
                         </div>`;
                 });
-            } else { list.innerHTML = '<p style="color:#888; text-align:center;">لا توجد طلبات معلقة</p>'; }
+            } else { list.innerHTML = '<p style="color:#888; text-align:center;">لا توجد طلبات</p>'; }
         });
     }
 
-    // دالة الموافقة مع إضافة خيار (isHot)
+    // الموافقة وإرسال إشعار تلقائي لو كان "سعر لقطة"
     window.approve = (id, data, isHot) => { 
         const commission = Math.ceil(data.price * 0.10); 
         const finalPrice = data.price + commission;
         
-        const productToPublish = {
-            ...data,
-            originalPrice: data.price, 
-            commissionFee: commission, 
-            price: finalPrice,
-            hotDeal: isHot // حفظ حالة المنتج إذا كان لقطة
-        };
-        
-        push(ref(db, 'approved'), productToPublish); 
+        push(ref(db, 'approved'), { ...data, originalPrice: data.price, commissionFee: commission, price: finalPrice, hotDeal: isHot }); 
         remove(ref(db, `pending/${id}`)); 
-        Swal.fire('تم بنجاح', `تم النشر. السعر المعروض للناس هو: ${finalPrice} ج.م`, 'success'); 
+        
+        // إذا كان سعر لقطة، يتم إرسال إشعار لكل الناس فوراً
+        if(isHot) {
+            push(ref(db, 'notifications'), { 
+                title: '🔥 سعر لقطة جديد في المتجر!', 
+                body: `تم إضافة ${data.name} بسعر ${finalPrice} ج.م، الحق قبل ما يتباع!`, 
+                timestamp: Date.now() 
+            });
+        }
+        
+        Swal.fire('تم بنجاح', `تم النشر.`, 'success'); 
     };
     
-    window.del = (id) => { remove(ref(db, `pending/${id}`)); Swal.fire('تم', 'تم رفض الطلب وحذفه', 'info'); };
+    window.del = (id) => { remove(ref(db, `pending/${id}`)); };
 
-    // قسم إدارة المتجر: عرض المنتجات النشطة لحذفها
     function renderAdminShop() {
-        const list = document.getElementById('admin-manage-shop'); 
-        list.innerHTML = '';
-        if(allProducts.length === 0) {
-            list.innerHTML = '<p style="color:#888; text-align:center;">المتجر فارغ حالياً</p>';
-            return;
-        }
+        const list = document.getElementById('admin-manage-shop'); list.innerHTML = '';
         allProducts.forEach(p => {
             list.innerHTML += `
                 <div class="glass request-item" style="display:flex; justify-content:space-between; align-items:center; padding: 10px;">
                     <span style="font-size:0.9rem; flex:1;">${p.name} <br><b style="color:var(--gold)">${p.price} ج.م</b></span>
-                    <button class="btn btn-glass" style="padding:8px; font-size:0.8rem; color:#ff4444; border-color:#ff4444; width:auto;" onclick="window.delApproved('${p.id}')">حذف (مُباع)</button>
+                    <button class="btn btn-glass" style="padding:8px; font-size:0.8rem; color:#ff4444; width:auto;" onclick="window.delApproved('${p.id}')">مُباع (حذف)</button>
                 </div>`;
         });
     }
 
-    // دالة حذف منتج من المتجر
     window.delApproved = (id) => {
-        Swal.fire({
-            title: 'حذف المنتج؟',
-            text: "هل تريد بالتأكيد إزالة هذا المنتج من المتجر؟",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonText: 'نعم، احذفه',
-            cancelButtonText: 'إلغاء'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                remove(ref(db, `approved/${id}`));
-                Swal.fire('تم الحذف', 'تم إزالة المنتج من المتجر', 'success');
-            }
+        Swal.fire({ title: 'حذف المنتج؟', icon: 'warning', showCancelButton: true, confirmButtonText: 'نعم' }).then((r) => {
+            if (r.isConfirmed) { remove(ref(db, `approved/${id}`)); }
         });
     };
     
-    // التنقل بين الصفحات
     window.tab = (id, el) => {
         document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -464,11 +536,7 @@
 </script>
     <script>
   if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./service-worker.js')
-        .then(reg => console.log('Service Worker Registered'))
-        .catch(err => console.log('Service Worker Failed', err));
-    });
+    window.addEventListener('load', () => { navigator.serviceWorker.register('./service-worker.js').catch(err => console.log('SW Failed', err)); });
   }
 </script>
 </body>
