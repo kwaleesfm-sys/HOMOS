@@ -28,7 +28,7 @@
         #auth-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; padding: 20px; }
         .auth-card { width: 100%; max-width: 400px; padding: 40px 25px; text-align: center; }
         input, textarea, select { width: 100%; padding: 15px; margin: 10px 0; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-radius: 15px; color: #fff; outline: none; font-size: 1rem; }
-        input:focus, textarea:focus { border-color: var(--gold); box-shadow: 0 0 10px rgba(255, 215, 0, 0.1); }
+        input:focus, textarea:focus, select:focus { border-color: var(--gold); box-shadow: 0 0 10px rgba(255, 215, 0, 0.1); }
         .btn { width: 100%; padding: 16px; border: none; border-radius: 15px; font-weight: 800; cursor: pointer; margin: 10px 0; }
         .btn-gold { background: linear-gradient(90deg, #FFD700, #FFB800); color: #000; }
         .btn-glass { background: var(--glass); color: #fff; border: 1px solid var(--glass-border); }
@@ -51,7 +51,10 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
 
         /* المتجر والكروت */
-        .search-bar { width: 100%; padding: 12px 20px; border-radius: 20px; background: var(--glass); border: 1px solid var(--gold); color: #fff; outline: none; margin-bottom: 15px; }
+        .search-container { display: flex; gap: 10px; margin-bottom: 15px; }
+        .search-bar { flex: 1; padding: 12px 20px; border-radius: 20px; background: var(--glass); border: 1px solid var(--gold); color: #fff; outline: none; margin: 0; }
+        .sort-select { width: auto; padding: 12px; border-radius: 20px; background: var(--glass); color: #fff; border: 1px solid var(--gold); outline: none; margin: 0; }
+        
         #products-list { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .product-card { background: var(--glass); border: 1px solid var(--glass-border); border-radius: 15px; overflow: hidden; position: relative; display: flex; flex-direction: column; padding: 10px; }
         .product-card .product-img { width: 100%; height: 140px; object-fit: cover; border-radius: 10px; margin-bottom: 10px; }
@@ -114,7 +117,14 @@
     <div id="main-app">
         
         <div id="shop" class="tab-content active">
-            <input type="text" id="smartSearch" class="search-bar" placeholder="ابحث عن منتج، لقطة..." oninput="window.filterShop()">
+            <div class="search-container">
+                <input type="text" id="smartSearch" class="search-bar" placeholder="ابحث عن منتج، لقطة..." oninput="window.filterShop()">
+                <select id="sort-price" class="sort-select" onchange="window.filterShop()">
+                    <option value="latest">الأحدث</option>
+                    <option value="low">الأرخص</option>
+                    <option value="high">الأغلى</option>
+                </select>
+            </div>
             <div id="products-list"></div>
         </div>
 
@@ -180,7 +190,7 @@
                 <h3>📣 إرسال إشعار للجميع</h3>
                 <input type="text" id="admin-notif-title" placeholder="عنوان الإشعار">
                 <textarea id="admin-notif-body" rows="2" placeholder="التفاصيل..."></textarea>
-                <button class="btn btn-glass" style="color:#00f2fe; border-color:#00f2fe;" onclick="window.sendCustomNotif()">إرسال 🚀</button>
+                <button class="btn btn-glass" style="color:#00f2fe; border-color:#00f2fe;" onclick="window.sendCustomNotif()">إرسال الإشعار 🚀</button>
             </div>
 
             <h3 style="margin-top: 30px;">🚚 إدارة طلبات الشراء (للعملاء)</h3>
@@ -189,7 +199,7 @@
             <h3 style="margin-top: 30px;">📦 طلبات المنتجات (للمراجعة)</h3>
             <div id="admin-requests"></div>
 
-            <h3 style="margin-top: 30px; border-top: 1px solid #333; padding-top: 20px;">🗑️ إدارة المتجر الحالي</h3>
+            <h3 style="margin-top: 30px; border-top: 1px solid #333; padding-top: 20px;">🗑️ إدارة المتجر الحالي (حذف المُباع)</h3>
             <div id="admin-manage-shop"></div>
         </div>
 
@@ -225,11 +235,17 @@
     let currentUserData = null;
     let allProducts = [];
 
-    // --- نظام التحميل (Loader) ---
+    // القاموس الذكي للبحث
+    const smartDictionary = {
+        "ايفون": "iphone", "سامسونج": "samsung", "بلايستيشن": "playstation", 
+        "شاومي": "xiaomi", "ابل": "apple", "برو": "pro", "ماكس": "max", "لاب": "laptop"
+    };
+
+    // --- نظام التحميل ---
     window.showLoader = () => document.getElementById('global-loader').style.display = 'flex';
     window.hideLoader = () => document.getElementById('global-loader').style.display = 'none';
 
-    // --- المصادقة وتسجيل الدخول ---
+    // --- المصادقة ---
     onAuthStateChanged(auth, async (user) => {
         if (user) {
             document.getElementById('auth-screen').style.display = 'none';
@@ -245,11 +261,7 @@
                 const randomPart = Math.floor(100 + Math.random()*900);
                 const refCode = namePart + randomPart;
                 
-                const updateData = { 
-                    email: user.email, wallet: snapshot.exists() ? (snapshot.val().wallet || 0) : 0, 
-                    refCode: refCode, usedRef: snapshot.exists() ? (snapshot.val().usedRef || false) : false 
-                };
-                await update(userRef, updateData);
+                await update(userRef, { email: user.email, wallet: snapshot.exists() ? (snapshot.val().wallet || 0) : 0, refCode: refCode, usedRef: snapshot.exists() ? (snapshot.val().usedRef || false) : false });
                 await set(ref(db, `refCodes/${refCode}`), user.uid);
             }
 
@@ -270,7 +282,7 @@
             
             fetchShop();
             fetchNotifications();
-            fetchMyProductsAndOrders(user.email); // جلب حالة طلبات ومنتجات المستخدم
+            fetchMyProductsAndOrders(user.email);
         } else {
             document.getElementById('auth-screen').style.display = 'flex';
             document.getElementById('main-app').style.display = 'none';
@@ -278,26 +290,9 @@
         }
     });
 
-    window.login = async () => {
-        showLoader();
-        try { await signInWithEmailAndPassword(auth, email.value, password.value); } 
-        catch(e) { Swal.fire('خطأ', 'بيانات الدخول خاطئة', 'error'); }
-        hideLoader();
-    };
-
-    window.signup = async () => {
-        showLoader();
-        try { await createUserWithEmailAndPassword(auth, email.value, password.value); } 
-        catch(e) { Swal.fire('خطأ', 'البريد مستخدم أو كلمة المرور ضعيفة', 'error'); }
-        hideLoader();
-    };
-
-    // إصلاح مشكلة تسجيل الخروج بالكامل
-    window.logout = async () => {
-        showLoader();
-        await signOut(auth);
-        window.location.reload(); // إعادة تحميل الصفحة لتنظيف الذاكرة تماماً
-    };
+    window.login = async () => { showLoader(); try { await signInWithEmailAndPassword(auth, email.value, password.value); } catch(e) { Swal.fire('خطأ', 'بيانات الدخول خاطئة', 'error'); } hideLoader(); };
+    window.signup = async () => { showLoader(); try { await createUserWithEmailAndPassword(auth, email.value, password.value); } catch(e) { Swal.fire('خطأ', 'البريد مستخدم أو كلمة المرور ضعيفة', 'error'); } hideLoader(); };
+    window.logout = async () => { showLoader(); await signOut(auth); window.location.reload(); };
 
     // --- الإشعارات ---
     window.toggleNotifications = () => {
@@ -312,8 +307,8 @@
 
     function fetchNotifications() {
         onValue(ref(db, 'notifications'), (snap) => {
-            const list = document.getElementById('notif-list');
-            list.innerHTML = '';
+            const list = document.getElementById('notif-list'); list.innerHTML = '';
+            const badge = document.getElementById('notif-badge');
             const vals = snap.val();
             let unreadCount = 0;
             const lastRead = localStorage.getItem('lastReadNotif') || 0;
@@ -323,26 +318,18 @@
                 notifsArray.forEach(n => {
                     if (n.timestamp > lastRead) unreadCount++;
                     list.innerHTML += `
-                        <div class="notif-item glass">
-                            <h4>${n.title}</h4>
-                            <p>${n.body}</p>
+                        <div class="notif-item glass" style="border-right: 3px solid ${n.timestamp > lastRead ? 'var(--gold)' : 'transparent'}">
+                            <h4>${n.title}</h4><p>${n.body}</p>
                         </div>`;
                 });
-                if (unreadCount > 0) {
-                    document.getElementById('notif-badge').innerText = unreadCount;
-                    document.getElementById('notif-badge').style.display = 'block';
-                }
-            } else { list.innerHTML = '<p style="text-align:center; color:#888;">لا توجد إشعارات</p>'; }
+                if (unreadCount > 0) { badge.innerText = unreadCount; badge.style.display = 'block'; } 
+                else { badge.style.display = 'none'; }
+            } else { list.innerHTML = '<p style="text-align:center; color:#888;">لا توجد إشعارات</p>'; badge.style.display = 'none'; }
         });
     }
 
-    // --- عمليات المتجر ---
-    window.handleImg = (e) => { 
-        showLoader();
-        const r = new FileReader(); 
-        r.onload = () => { imgData = r.result; hideLoader(); }; 
-        r.readAsDataURL(e.target.files[0]); 
-    };
+    // --- المتجر ---
+    window.handleImg = (e) => { showLoader(); const r = new FileReader(); r.onload = () => { imgData = r.result; hideLoader(); }; r.readAsDataURL(e.target.files[0]); };
 
     window.sendToReview = async () => {
         const n = document.getElementById('p-name').value, p = document.getElementById('p-price').value, d = document.getElementById('p-desc').value, ph = document.getElementById('p-phone').value;
@@ -351,76 +338,8 @@
         showLoader();
         await push(ref(db, 'pending'), { name: n, price: parseFloat(p), desc: d, phone: ph, img: imgData, owner: auth.currentUser.email, timestamp: Date.now() });
         hideLoader();
-        
-        Swal.fire('تم الرفع!', 'منتجك الآن قيد المراجعة، تابعه من صفحة حسابي.', 'success');
+        Swal.fire('تم الرفع!', 'منتجك الآن قيد المراجعة.', 'success');
         document.getElementById('p-name').value = ''; document.getElementById('p-price').value = ''; document.getElementById('p-desc').value = ''; document.getElementById('p-phone').value = '';
-    };
-
-    window.buyProduct = async (name, price) => {
-        let currentWallet = currentUserData.wallet || 0;
-        const usedPromos = currentUserData.usedPromos || {};
-        
-        const { value: formValues } = await Swal.fire({
-            title: `إتمام الشراء`,
-            html: `
-                <h3 style="color:#000;">المطلوب: ${price} ج.م</h3>
-                <p style="font-size:0.85rem; color:#444;">رصيد محفظتك: ${currentWallet} ج.م</p>
-                <label style="color:#000;"><input type="checkbox" id="use-wallet" ${currentWallet > 0 ? '' : 'disabled'}> خصم من المحفظة</label>
-                <hr style="margin:15px 0;">
-                <input id="swal-promo" class="swal2-input" placeholder="كود الخصم" style="text-transform: uppercase;">
-            `,
-            focusConfirm: false, showCancelButton: true, confirmButtonText: 'تأكيد الطلب', cancelButtonText: 'إلغاء',
-            preConfirm: () => {
-                return { promo: document.getElementById('swal-promo').value.toUpperCase(), useWallet: document.getElementById('use-wallet').checked };
-            }
-        });
-
-        if (formValues) {
-            showLoader();
-            let finalPrice = price;
-            let msgDetails = `%0A🛍️ *طلب شراء:* ${name}%0A💵 *السعر:* ${price} ج.م`;
-            let updatesToUser = {};
-
-            if(formValues.promo) {
-                if(usedPromos[formValues.promo]) { hideLoader(); return Swal.fire('عذراً', 'لقد استخدمت الكود سابقاً', 'error'); }
-                const promoSnap = await get(ref(db, `promos/${formValues.promo}`));
-                if(promoSnap.exists()) {
-                    const discountAmount = finalPrice * (promoSnap.val().discount / 100);
-                    finalPrice -= discountAmount;
-                    msgDetails += `%0A🎟️ *خصم:* (-${discountAmount} ج.م)`;
-                    updatesToUser[`usedPromos/${formValues.promo}`] = true;
-                } else { hideLoader(); return Swal.fire('عذراً', 'كود الخصم غير صحيح', 'error'); }
-            }
-
-            let walletDeducted = 0;
-            if(formValues.useWallet && currentWallet > 0) {
-                walletDeducted = Math.min(finalPrice, currentWallet); 
-                finalPrice -= walletDeducted;
-                updatesToUser['wallet'] = currentWallet - walletDeducted;
-                msgDetails += `%0A💼 *محفظة:* تم خصم ${walletDeducted} ج.م`;
-            }
-
-            if(finalPrice < 0) finalPrice = 0;
-            msgDetails += `%0A✅ *المطلوب دفعه نهائياً:* ${finalPrice} ج.م`;
-
-            // تسجيل الطلب في قاعدة البيانات (للتتبع)
-            await push(ref(db, 'orders'), { 
-                uid: auth.currentUser.uid, userEmail: auth.currentUser.email, productName: name, finalPrice: finalPrice, status: 'جاري التجهيز ⏳', timestamp: Date.now() 
-            });
-
-            if(Object.keys(updatesToUser).length > 0) { await update(ref(db, `users/${auth.currentUser.uid}`), updatesToUser); }
-            hideLoader();
-
-            await Swal.fire('تم تأكيد الطلب!', `يمكنك متابعة حالة الطلب من حسابك.`, 'success');
-            window.open(`https://wa.me/201016553764?text=${msgDetails}`, '_blank');
-        }
-    };
-
-    window.shareProduct = (id, name, price) => {
-        const shareUrl = `${window.location.origin}${window.location.pathname}?view=${id}`;
-        const text = `شوف المنتج ده "${name}" بسعر ${price} ج.م على HOMOS!`;
-        if (navigator.share) { navigator.share({ title: 'HOMOS', text: text, url: shareUrl }); } 
-        else { navigator.clipboard.writeText(text + " " + shareUrl); Swal.fire('تم النسخ', '', 'success'); }
     };
 
     function fetchShop() {
@@ -428,7 +347,8 @@
             allProducts = [];
             const val = s.val();
             if(val) { Object.keys(val).reverse().forEach(id => { allProducts.push({ id, ...val[id] }); }); }
-            renderShop(allProducts);
+            window.filterShop(); // يتم استدعاء الفلترة لعرض المنتجات
+            if(auth.currentUser && auth.currentUser.email === ADMIN) renderAdminShop();
         });
     }
 
@@ -450,22 +370,106 @@
         } else { list.innerHTML = '<p style="text-align:center; color:#666; grid-column: span 2;">لا توجد منتجات</p>'; }
     }
 
+    // محرك البحث الذكي والترتيب
     window.filterShop = () => {
-        const query = document.getElementById('smartSearch').value.toLowerCase();
-        const filtered = allProducts.filter(p => p.name.toLowerCase().includes(query) || (p.desc && p.desc.toLowerCase().includes(query)));
+        let originalQuery = document.getElementById('smartSearch').value.toLowerCase();
+        let query = originalQuery;
+        
+        // تطبيق القاموس الذكي
+        Object.keys(smartDictionary).forEach(arWord => {
+            if (query.includes(arWord)) query = query.replace(arWord, smartDictionary[arWord]);
+        });
+
+        let filtered = allProducts.filter(p => {
+            const pName = p.name.toLowerCase();
+            const pDesc = (p.desc || "").toLowerCase();
+            return pName.includes(query) || pDesc.includes(query) || pName.includes(originalQuery) || pDesc.includes(originalQuery) || (p.hotDeal && 'لقطة'.includes(originalQuery));
+        });
+
+        // ترتيب المنتجات
+        const sortVal = document.getElementById('sort-price').value;
+        if (sortVal === 'low') { filtered.sort((a, b) => a.price - b.price); }
+        else if (sortVal === 'high') { filtered.sort((a, b) => b.price - a.price); }
+        // default is 'latest' which is already handled by reversing the array in fetchShop
+
         renderShop(filtered);
     };
 
-    // --- نظام تتبع المستخدم (طلباتي ومنتجاتي) ---
+    // --- الشراء والإحالة (كما هي في السابق) ---
+    window.buyProduct = async (name, price) => { /*... الكود الخاص بك لشراء المنتج سيعمل بشكل ممتاز لأننا لم نلمسه ...*/ 
+        let currentWallet = currentUserData.wallet || 0;
+        const usedPromos = currentUserData.usedPromos || {};
+        
+        const { value: formValues } = await Swal.fire({
+            title: `إتمام الشراء`,
+            html: `
+                <h3 style="color:#000;">المطلوب: ${price} ج.م</h3>
+                <p style="font-size:0.85rem; color:#444;">رصيد محفظتك: ${currentWallet} ج.م</p>
+                <label style="color:#000;"><input type="checkbox" id="use-wallet" ${currentWallet > 0 ? '' : 'disabled'}> خصم من المحفظة</label>
+                <hr style="margin:15px 0;">
+                <input id="swal-promo" class="swal2-input" placeholder="كود الخصم" style="text-transform: uppercase;">
+            `,
+            focusConfirm: false, showCancelButton: true, confirmButtonText: 'تأكيد الطلب', cancelButtonText: 'إلغاء',
+            preConfirm: () => { return { promo: document.getElementById('swal-promo').value.toUpperCase(), useWallet: document.getElementById('use-wallet').checked }; }
+        });
+
+        if (formValues) {
+            showLoader();
+            let finalPrice = price; let msgDetails = `%0A🛍️ *طلب شراء:* ${name}%0A💵 *السعر:* ${price} ج.م`; let updatesToUser = {};
+            if(formValues.promo) {
+                if(usedPromos[formValues.promo]) { hideLoader(); return Swal.fire('عذراً', 'لقد استخدمت الكود سابقاً', 'error'); }
+                const promoSnap = await get(ref(db, `promos/${formValues.promo}`));
+                if(promoSnap.exists()) {
+                    const discountAmount = finalPrice * (promoSnap.val().discount / 100);
+                    finalPrice -= discountAmount; msgDetails += `%0A🎟️ *خصم:* (-${discountAmount} ج.م)`; updatesToUser[`usedPromos/${formValues.promo}`] = true;
+                } else { hideLoader(); return Swal.fire('عذراً', 'كود الخصم غير صحيح', 'error'); }
+            }
+            let walletDeducted = 0;
+            if(formValues.useWallet && currentWallet > 0) {
+                walletDeducted = Math.min(finalPrice, currentWallet); 
+                finalPrice -= walletDeducted; updatesToUser['wallet'] = currentWallet - walletDeducted; msgDetails += `%0A💼 *محفظة:* تم خصم ${walletDeducted} ج.م`;
+            }
+            if(finalPrice < 0) finalPrice = 0;
+            msgDetails += `%0A✅ *المطلوب دفعه نهائياً:* ${finalPrice} ج.م`;
+
+            await push(ref(db, 'orders'), { uid: auth.currentUser.uid, userEmail: auth.currentUser.email, productName: name, finalPrice: finalPrice, status: 'جاري التجهيز ⏳', timestamp: Date.now() });
+            if(Object.keys(updatesToUser).length > 0) { await update(ref(db, `users/${auth.currentUser.uid}`), updatesToUser); }
+            hideLoader();
+            await Swal.fire('تم تأكيد الطلب!', `يمكنك متابعة حالة الطلب من حسابك.`, 'success');
+            window.open(`https://wa.me/201016553764?text=${msgDetails}`, '_blank');
+        }
+    };
+    
+    window.shareProduct = (id, name, price) => {
+        const shareUrl = `${window.location.origin}${window.location.pathname}?view=${id}`;
+        const text = `شوف المنتج ده "${name}" بسعر ${price} ج.م على HOMOS!`;
+        if (navigator.share) { navigator.share({ title: 'HOMOS', text: text, url: shareUrl }); } 
+        else { navigator.clipboard.writeText(text + " " + shareUrl); Swal.fire('تم النسخ', '', 'success'); }
+    };
+    window.copyRef = () => { navigator.clipboard.writeText(document.getElementById('my-ref-code').innerText); Swal.fire({icon: 'success', title: 'تم النسخ!', timer: 1500}); };
+    window.applyRef = async () => {
+        const friendCode = document.getElementById('friend-ref').value.toUpperCase().trim();
+        if(!friendCode) return Swal.fire('خطأ', 'أدخل الكود أولاً', 'error');
+        if(currentUserData.usedRef) return Swal.fire('عذراً', 'استخدمت كود إحالة سابقاً', 'warning');
+        if(friendCode === currentUserData.refCode) return Swal.fire('خطأ', 'لا يمكنك استخدام كودك الخاص', 'error');
+        showLoader();
+        const codeSnap = await get(ref(db, `refCodes/${friendCode}`));
+        if(codeSnap.exists()) {
+            const friendUid = codeSnap.val(); const friendWalletSnap = await get(ref(db, `users/${friendUid}/wallet`));
+            await update(ref(db, `users/${friendUid}`), { wallet: (friendWalletSnap.val() || 0) + 10 });
+            await update(ref(db, `users/${auth.currentUser.uid}`), { wallet: (currentUserData.wallet || 0) + 5, usedRef: true });
+            hideLoader(); Swal.fire('مبروك!', 'تم تفعيل الكود وربحت 5 ج.م!', 'success'); document.getElementById('friend-ref').value = '';
+        } else { hideLoader(); Swal.fire('خطأ', 'كود الإحالة غير صحيح', 'error'); }
+    };
+
+    // --- حسابي (تتبع الطلبات) ---
     function fetchMyProductsAndOrders(userEmail) {
-        // 1. جلب المشتريات
         onValue(ref(db, 'orders'), (s) => {
             const list = document.getElementById('my-orders-list'); list.innerHTML = '';
-            const val = s.val();
             let hasOrders = false;
-            if(val) {
-                Object.keys(val).forEach(id => {
-                    const order = val[id];
+            if(s.val()) {
+                Object.keys(s.val()).forEach(id => {
+                    const order = s.val()[id];
                     if(order.uid === auth.currentUser.uid) {
                         hasOrders = true;
                         let sClass = order.status.includes('جاري') ? 'status-pending' : 'status-approved';
@@ -476,53 +480,58 @@
             if(!hasOrders) list.innerHTML = '<p style="font-size:0.8rem; color:#888;">لم تقم بأي طلبات بعد.</p>';
         });
 
-        // 2. جلب المنتجات المرفوعة (للبائع)
-        const renderMyProducts = (dataList, statusText, statusClass) => {
-            let html = '';
-            if(dataList) {
-                Object.keys(dataList).forEach(id => {
-                    if(dataList[id].owner === userEmail) {
-                        html += `<div class="request-item"><b>${dataList[id].name}</b> <br> السعر: ${dataList[id].price} ج.م <br> <span class="status-badge ${statusClass}">${statusText} ${dataList[id].reason ? '- '+dataList[id].reason : ''}</span></div>`;
-                    }
-                });
-            }
-            return html;
-        };
-
         const updateProductsUI = async () => {
             const list = document.getElementById('my-products-list'); list.innerHTML = '';
             const [pSnap, aSnap, rSnap] = await Promise.all([get(ref(db, 'pending')), get(ref(db, 'approved')), get(ref(db, 'rejected'))]);
-            let totalHtml = renderMyProducts(pSnap.val(), 'قيد المراجعة ⏳', 'status-pending') + renderMyProducts(aSnap.val(), 'موافق عليه ومسعر ✅', 'status-approved') + renderMyProducts(rSnap.val(), 'مرفوض ❌', 'status-rejected');
+            const renderHTML = (data, text, cls) => {
+                let html = '';
+                if(data) Object.keys(data).forEach(id => {
+                    if(data[id].owner === userEmail) html += `<div class="request-item"><b>${data[id].name}</b> <br> <span class="status-badge ${cls}">${text} ${data[id].reason ? '- '+data[id].reason : ''}</span></div>`;
+                }); return html;
+            };
+            let totalHtml = renderHTML(pSnap.val(), 'قيد المراجعة ⏳', 'status-pending') + renderHTML(aSnap.val(), 'معروض في المتجر ✅', 'status-approved') + renderHTML(rSnap.val(), 'مرفوض ❌', 'status-rejected');
             list.innerHTML = totalHtml || '<p style="font-size:0.8rem; color:#888;">لم تعرض أي منتج للبيع بعد.</p>';
         };
-        updateProductsUI(); // تشغيل لمرة واحدة عند التحميل
+        updateProductsUI();
     }
 
-
-    // --- لوحة المدير ---
-    window.sendCustomNotif = () => { /* نفس الكود السابق */ };
+    // --- لوحة المدير (الإصلاحات الكبرى هنا) ---
+    window.sendCustomNotif = async () => {
+        const title = document.getElementById('admin-notif-title').value;
+        const body = document.getElementById('admin-notif-body').value;
+        if(!title || !body) return Swal.fire('خطأ', 'اكتب العنوان والتفاصيل', 'error');
+        
+        showLoader();
+        try {
+            await push(ref(db, 'notifications'), { title: title, body: body, timestamp: Date.now() });
+            Swal.fire('تم الإرسال 🚀', 'تم إرسال الإشعار للجميع', 'success');
+            document.getElementById('admin-notif-title').value = ''; document.getElementById('admin-notif-body').value = '';
+        } catch(e) { Swal.fire('خطأ', 'فشل الإرسال', 'error'); }
+        hideLoader();
+    };
     
     function fetchAdmin() {
-        // 1. طلبات مراجعة المنتجات
+        // مراجعة المنتجات
         onValue(ref(db, 'pending'), (s) => {
             const list = document.getElementById('admin-requests'); list.innerHTML = '';
             if(s.val()) {
                 Object.keys(s.val()).forEach(id => {
                     const i = s.val()[id];
-                    const safeData = JSON.stringify(i).replace(/'/g, "&apos;").replace(/"/g, "&quot;");
+                    // التعديل: إرسال ID فقط في الـ HTML لمنع الأخطاء البرمجية
                     list.innerHTML += `
                         <div class="glass request-item">
                             <p><b>المنتج:</b> ${i.name} (${i.price} ج.م) - المالك: ${i.owner}</p>
                             <div style="display:flex; gap:5px; margin-top:10px;">
-                                <button class="btn btn-gold" style="padding:8px; font-size:0.8rem; flex:1;" onclick='window.approve("${id}", ${safeData}, false)'>✅ موافقة</button>
-                                <button class="btn" style="padding:8px; font-size:0.8rem; flex:1; background: #dc3545; color: #fff;" onclick='window.reject("${id}", ${safeData})'>❌ رفض</button>
+                                <button class="btn btn-gold" style="padding:8px; font-size:0.8rem; flex:1;" onclick='window.approveProduct("${id}", false)'>✅ موافقة</button>
+                                <button class="btn" style="padding:8px; font-size:0.8rem; flex:1; background: #ff4b2b; color: #fff;" onclick='window.approveProduct("${id}", true)'>🔥 لقطة</button>
                             </div>
+                            <button class="btn btn-glass" style="padding:8px; font-size:0.8rem; color:#ff4444; width:100%; margin-top:5px;" onclick='window.rejectProduct("${id}")'>❌ رفض</button>
                         </div>`;
                 });
             } else { list.innerHTML = '<p style="color:#888; text-align:center;">لا توجد طلبات منتجات</p>'; }
         });
 
-        // 2. طلبات الشراء للعملاء
+        // طلبات العملاء
         onValue(ref(db, 'orders'), (s) => {
             const list = document.getElementById('admin-orders-list'); list.innerHTML = '';
             if(s.val()) {
@@ -531,43 +540,55 @@
                     list.innerHTML += `
                         <div class="glass request-item">
                             <p><b>مشتري:</b> ${o.userEmail} <br> <b>منتج:</b> ${o.productName} (${o.finalPrice} ج.م)</p>
-                            <p style="font-size:0.8rem; color:var(--gold);">الحالة الحالية: ${o.status}</p>
+                            <p style="font-size:0.8rem; color:var(--gold);">الحالة: ${o.status}</p>
                             <select id="status-${id}" style="padding:5px; margin-top:5px; width:100%;">
                                 <option value="جاري التجهيز ⏳">جاري التجهيز</option>
                                 <option value="جاري التوصيل 🚚">جاري التوصيل</option>
                                 <option value="تم التسليم ✅">تم التسليم</option>
                             </select>
-                            <button class="btn btn-glass" style="padding:8px; margin-top:5px;" onclick="window.updateOrderStatus('${id}')">تحديث حالة الطلب</button>
+                            <button class="btn btn-glass" style="padding:8px; margin-top:5px;" onclick="window.updateOrderStatus('${id}')">تحديث الحالة</button>
                         </div>`;
                 });
             } else { list.innerHTML = '<p style="color:#888;">لا توجد طلبات شراء</p>'; }
         });
-
-        renderAdminShop();
     }
 
-    // موافقة أو رفض المنتج
-    window.approve = async (id, data, isHot) => { 
+    // دوال الموافقة والرفض المعدلة التي تسحب البيانات مباشرة لحل مشكلة الأخطاء
+    window.approveProduct = async (id, isHot) => {
         showLoader();
-        const commission = Math.ceil(data.price * 0.10); 
-        await push(ref(db, 'approved'), { ...data, originalPrice: data.price, price: data.price + commission, hotDeal: isHot }); 
-        await remove(ref(db, `pending/${id}`)); 
+        try {
+            const snap = await get(ref(db, `pending/${id}`));
+            if(snap.exists()){
+                const data = snap.val();
+                const commission = Math.ceil(data.price * 0.10);
+                const finalPrice = data.price + commission;
+                
+                await push(ref(db, 'approved'), { ...data, originalPrice: data.price, price: finalPrice, hotDeal: isHot });
+                await remove(ref(db, `pending/${id}`));
+                
+                if(isHot) {
+                    await push(ref(db, 'notifications'), { title: '🔥 سعر لقطة جديد!', body: `تم إضافة ${data.name} بسعر ${finalPrice} ج.م في المتجر!`, timestamp: Date.now() });
+                }
+                Swal.fire('تم', `تم نشر المنتج بنجاح.`, 'success');
+            }
+        } catch(e) { console.error(e); }
         hideLoader();
-        Swal.fire('تم', `تم النشر بنجاح.`, 'success'); 
     };
 
-    window.reject = async (id, data) => {
+    window.rejectProduct = async (id) => {
         const { value: reason } = await Swal.fire({ title: 'سبب الرفض؟', input: 'text', showCancelButton: true });
         if(reason) {
             showLoader();
-            await push(ref(db, 'rejected'), { ...data, reason: reason });
-            await remove(ref(db, `pending/${id}`));
+            const snap = await get(ref(db, `pending/${id}`));
+            if(snap.exists()){
+                await push(ref(db, 'rejected'), { ...snap.val(), reason: reason });
+                await remove(ref(db, `pending/${id}`));
+                Swal.fire('تم', 'تم رفض المنتج', 'info');
+            }
             hideLoader();
-            Swal.fire('تم', 'تم رفض المنتج', 'info');
         }
     };
 
-    // تحديث حالة أوردر العميل
     window.updateOrderStatus = async (id) => {
         const newStatus = document.getElementById(`status-${id}`).value;
         showLoader();
@@ -576,10 +597,29 @@
         Swal.fire('تم', 'تم تحديث حالة الطلب للعميل', 'success');
     };
 
-    function renderAdminShop() { /* نفس الكود السابق الخاص بالحذف من المتجر */ }
-    window.delApproved = (id) => { /* نفس الكود */ };
+    // التعديل: قسم حذف المنتجات المباعة
+    function renderAdminShop() {
+        const list = document.getElementById('admin-manage-shop'); list.innerHTML = '';
+        allProducts.forEach(p => {
+            list.innerHTML += `
+                <div class="glass request-item" style="display:flex; justify-content:space-between; align-items:center; padding: 10px;">
+                    <span style="font-size:0.9rem; flex:1;">${p.name} <br><b style="color:var(--gold)">${p.price} ج.م</b></span>
+                    <button class="btn btn-glass" style="padding:8px; font-size:0.8rem; color:#ff4444; width:auto;" onclick="window.delApproved('${p.id}')">مُباع (حذف)</button>
+                </div>`;
+        });
+    }
+
+    window.delApproved = async (id) => {
+        const result = await Swal.fire({ title: 'هل تم بيع المنتج؟', text: 'سيتم حذفه من المتجر نهائياً', icon: 'warning', showCancelButton: true, confirmButtonText: 'نعم، احذف', cancelButtonText: 'إلغاء' });
+        if (result.isConfirmed) {
+            showLoader();
+            await remove(ref(db, `approved/${id}`));
+            hideLoader();
+            Swal.fire('تم', 'تم حذف المنتج من المتجر', 'success');
+        }
+    };
     
-    // --- التنقل ---
+    // --- التنقل بين الصفحات ---
     window.tab = (id, el) => {
         document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
