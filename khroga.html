@@ -396,7 +396,7 @@
     };
 
     // --- الشراء والإحالة (كما هي في السابق) ---
-    window.buyProduct = async (name, price) => { /*... الكود الخاص بك لشراء المنتج سيعمل بشكل ممتاز لأننا لم نلمسه ...*/ 
+    window.buyProduct = async (name, price) => { 
         let currentWallet = currentUserData.wallet || 0;
         const usedPromos = currentUserData.usedPromos || {};
         
@@ -446,8 +446,23 @@
         if (navigator.share) { navigator.share({ title: 'HOMOS', text: text, url: shareUrl }); } 
         else { navigator.clipboard.writeText(text + " " + shareUrl); Swal.fire('تم النسخ', '', 'success'); }
     };
+    
     window.copyRef = () => { navigator.clipboard.writeText(document.getElementById('my-ref-code').innerText); Swal.fire({icon: 'success', title: 'تم النسخ!', timer: 1500}); };
+    
+    // --- التعديل هنا: دالة الإحالة الجديدة بشرط الـ PWA ---
     window.applyRef = async () => {
+        const isPWA = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+        
+        if (!isPWA) {
+            return Swal.fire({
+                title: 'تطبيق HOMOS مطلوب!',
+                text: 'عذراً! لكي يعمل كود الإحالة وتربح، يجب عليك تثبيت تطبيق HOMOS على شاشتك الرئيسية وفتحه من هناك.',
+                icon: 'warning',
+                confirmButtonText: 'حسناً، فهمت',
+                confirmButtonColor: '#FFD700'
+            });
+        }
+
         const friendCode = document.getElementById('friend-ref').value.toUpperCase().trim();
         if(!friendCode) return Swal.fire('خطأ', 'أدخل الكود أولاً', 'error');
         if(currentUserData.usedRef) return Swal.fire('عذراً', 'استخدمت كود إحالة سابقاً', 'warning');
@@ -461,6 +476,7 @@
             hideLoader(); Swal.fire('مبروك!', 'تم تفعيل الكود وربحت 5 ج.م!', 'success'); document.getElementById('friend-ref').value = '';
         } else { hideLoader(); Swal.fire('خطأ', 'كود الإحالة غير صحيح', 'error'); }
     };
+    // --- نهاية التعديل ---
 
     // --- حسابي (تتبع الطلبات) ---
     function fetchMyProductsAndOrders(userEmail) {
@@ -517,7 +533,6 @@
             if(s.val()) {
                 Object.keys(s.val()).forEach(id => {
                     const i = s.val()[id];
-                    // التعديل: إرسال ID فقط في الـ HTML لمنع الأخطاء البرمجية
                     list.innerHTML += `
                         <div class="glass request-item">
                             <p><b>المنتج:</b> ${i.name} (${i.price} ج.م) - المالك: ${i.owner}</p>
@@ -553,7 +568,6 @@
         });
     }
 
-    // دوال الموافقة والرفض المعدلة التي تسحب البيانات مباشرة لحل مشكلة الأخطاء
     window.approveProduct = async (id, isHot) => {
         showLoader();
         try {
@@ -597,7 +611,6 @@
         Swal.fire('تم', 'تم تحديث حالة الطلب للعميل', 'success');
     };
 
-    // التعديل: قسم حذف المنتجات المباعة
     function renderAdminShop() {
         const list = document.getElementById('admin-manage-shop'); list.innerHTML = '';
         allProducts.forEach(p => {
