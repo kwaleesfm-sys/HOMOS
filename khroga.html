@@ -18,7 +18,7 @@
         body { background-color: var(--bg); background-image: radial-gradient(circle at top right, #1a1a00 0%, #020202 60%); color: #fff; margin: 0; padding-bottom: 100px; overflow-x: hidden; }
         .glass { background: var(--glass); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: 25px; }
 
-        /* شاشة التحميل (Loader) */
+        /* شاشة التحميل */
         #global-loader { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(2,2,2,0.9); z-index: 9999; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
         .spinner { border: 4px solid rgba(255,215,0,0.2); border-top: 4px solid var(--gold); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
@@ -40,7 +40,7 @@
         .notification-badge { position: absolute; top: -5px; right: -5px; background: red; color: white; border-radius: 50%; padding: 2px 6px; font-size: 0.6rem; font-weight: bold; display: none; animation: pulse 1s infinite;}
         
         #notifications-modal { display: none; position: fixed; top: 70px; right: 20px; left: 20px; max-height: 400px; overflow-y: auto; z-index: 2001; padding: 15px; }
-        .notif-item { padding: 10px; border-bottom: 1px solid var(--glass-border); margin-bottom: 10px; }
+        .notif-item { padding: 10px; border-bottom: 1px solid var(--glass-border); margin-bottom: 10px; border-radius: 10px; }
         .notif-item h4 { margin: 0 0 5px 0; color: var(--gold); font-size: 0.95rem; }
         .notif-item p { margin: 0; font-size: 0.8rem; color: #ccc; }
 
@@ -76,12 +76,16 @@
         .nav-item small { font-size: 0.65rem; font-weight: 500; }
 
         .wallet-box { background: rgba(255,215,0,0.1); border: 1px solid var(--gold); border-radius: 15px; padding: 15px; margin: 15px 0; }
-        .request-item { background: rgba(255,215,0,0.03); border-right: 4px solid var(--gold); margin-bottom: 15px; padding: 15px; }
+        .request-item { background: rgba(255,215,0,0.03); border-right: 4px solid var(--gold); margin-bottom: 15px; padding: 15px; border-radius: 10px; }
         
         .status-badge { display: inline-block; padding: 4px 8px; border-radius: 5px; font-size: 0.75rem; font-weight: bold; margin-top: 5px; }
         .status-pending { background: rgba(255, 193, 7, 0.2); color: #ffc107; border: 1px solid #ffc107; }
         .status-approved { background: rgba(40, 167, 69, 0.2); color: #28a745; border: 1px solid #28a745; }
         .status-rejected { background: rgba(220, 53, 69, 0.2); color: #dc3545; border: 1px solid #dc3545; }
+
+        /* تنسيقات إضافية للأدمن */
+        .admin-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
+        .admin-user-card { background: rgba(255,255,255,0.05); padding: 10px; border-radius: 10px; border: 1px solid var(--glass-border); display: flex; justify-content: space-between; align-items: center; }
     </style>
 </head>
 <body>
@@ -110,6 +114,7 @@
 
     <div id="notifications-modal" class="glass">
         <h3 style="color:var(--gold); margin-top:0; border-bottom:1px solid #333; padding-bottom:10px;">الإشعارات</h3>
+        <p style="font-size:0.7rem; color:#888; margin-top:-5px;">الإشعارات تُحذف تلقائياً بعد 24 ساعة من رؤيتها</p>
         <div id="notif-list"></div>
         <button class="btn btn-glass" style="padding: 10px; margin-top: 10px;" onclick="window.toggleNotifications()">إغلاق</button>
     </div>
@@ -129,22 +134,29 @@
         </div>
 
         <div id="services" class="tab-content">
+            <div class="glass card" style="border-top: 4px solid var(--gold); margin-bottom: 25px;">
+                <h2 style="color: var(--gold); text-align: center; margin-top:0;">🌟 من نحن</h2>
+                <p style="text-align: justify; font-size: 0.9rem; color: #ddd; line-height: 1.6;">
+                    منصة <b>HOMOS Store</b> هي السوق الأول والذكي في <b>المحلة الكبرى</b>. هدفنا القضاء على عشوائية النشر وتوفير بيئة آمنة وسريعة لبيع وشراء المنتجات المستعملة والجديدة، مع نظام أرباح يكافئك على دعوة أصدقائك. <b>سوقك في جيبك!</b>
+                </p>
+            </div>
+
             <h2 style="color: var(--gold); text-align: center;">FINANCE & INVESTMENT</h2>
             <div class="glass card" style="text-align: center;">
                 <h3 style="color: var(--gold);">💰 استثمر الآن</h3>
-                <p style="color: #aaa;">شارك في دورات HOMOS التجارية بأرباح مجزية.</p>
-                <button class="btn btn-gold" onclick="window.chat('استفسار عن الاستثمار')">تواصل للاستثمار</button>
+                <p style="color: #aaa; font-size: 0.85rem;">شارك في دورات HOMOS التجارية. (تنويه: الاستثمار يحتوي على نسب أرباح ومخاطر متغيرة حسب السوق).</p>
+                <button class="btn btn-gold" onclick="window.chat('أهلاً، مهتم بمعرفة تفاصيل الاستثمار وخطط العمل في HOMOS.')">تواصل للاستثمار</button>
             </div>
         </div>
 
         <div id="add" class="tab-content">
             <div class="glass card">
                 <h2 style="color: var(--gold); text-align: center;">بيع منتجك</h2>
-                <p style="text-align:center; font-size:0.85rem; color:#aaa;">سيتم إضافة رسوم خدمة رمزية على سعرك عند النشر</p>
-                <input type="text" id="p-name" placeholder="اسم المنتج">
-                <textarea id="p-desc" rows="3" placeholder="وصف المنتج بالتفصيل..."></textarea>
-                <input type="number" id="p-price" placeholder="سعرك المطلوب (الصافي لك)">
-                <input type="tel" id="p-phone" placeholder="رقم واتساب للتواصل معك">
+                <p style="text-align:center; font-size:0.85rem; color:#aaa;">سيتم حفظ ما تكتبه تلقائياً حتى لا تفقده 📝</p>
+                <input type="text" id="p-name" placeholder="اسم المنتج" oninput="window.saveDraft()">
+                <textarea id="p-desc" rows="3" placeholder="وصف المنتج بالتفصيل..." oninput="window.saveDraft()"></textarea>
+                <input type="number" id="p-price" placeholder="سعرك المطلوب (الصافي لك)" oninput="window.saveDraft()">
+                <input type="tel" id="p-phone" placeholder="رقم واتساب للتواصل معك" oninput="window.saveDraft()">
                 <p style="font-size: 0.8rem; color: #666;">ارفع صورة المنتج:</p>
                 <input type="file" accept="image/*" onchange="window.handleImg(event)">
                 <button class="btn btn-gold" onclick="window.sendToReview()">إرسال للمراجعة</button>
@@ -184,14 +196,18 @@
         </div>
 
         <div id="admin" class="tab-content">
-            <h2 style="color: var(--gold);">👑 لوحة الإدارة</h2>
+            <h2 style="color: var(--gold);">👑 لوحة الإدارة الشاملة</h2>
             
             <div class="glass card" style="border-left: 4px solid #00f2fe;">
-                <h3>📣 إرسال إشعار للجميع</h3>
+                <h3>📣 مركز الإشعارات</h3>
+                <input type="text" id="admin-notif-target" placeholder="إيميل مستخدم محدد (أو اتركه فارغاً للجميع)" style="border-color:#00f2fe;">
                 <input type="text" id="admin-notif-title" placeholder="عنوان الإشعار">
                 <textarea id="admin-notif-body" rows="2" placeholder="التفاصيل..."></textarea>
                 <button class="btn btn-glass" style="color:#00f2fe; border-color:#00f2fe;" onclick="window.sendCustomNotif()">إرسال الإشعار 🚀</button>
             </div>
+
+            <h3 style="margin-top: 30px; color:var(--gold);">👥 إدارة المستخدمين</h3>
+            <div id="admin-users-list" class="admin-grid"></div>
 
             <h3 style="margin-top: 30px;">🚚 إدارة طلبات الشراء (للعملاء)</h3>
             <div id="admin-orders-list"></div>
@@ -199,7 +215,7 @@
             <h3 style="margin-top: 30px;">📦 طلبات المنتجات (للمراجعة)</h3>
             <div id="admin-requests"></div>
 
-            <h3 style="margin-top: 30px; border-top: 1px solid #333; padding-top: 20px;">🗑️ إدارة المتجر الحالي (حذف المُباع)</h3>
+            <h3 style="margin-top: 30px; border-top: 1px solid #333; padding-top: 20px;">🗑️ إدارة المتجر الحالي</h3>
             <div id="admin-manage-shop"></div>
         </div>
 
@@ -235,13 +251,11 @@
     let currentUserData = null;
     let allProducts = [];
 
-    // القاموس الذكي للبحث
     const smartDictionary = {
         "ايفون": "iphone", "سامسونج": "samsung", "بلايستيشن": "playstation", 
         "شاومي": "xiaomi", "ابل": "apple", "برو": "pro", "ماكس": "max", "لاب": "laptop"
     };
 
-    // --- نظام التحميل ---
     window.showLoader = () => document.getElementById('global-loader').style.display = 'flex';
     window.hideLoader = () => document.getElementById('global-loader').style.display = 'none';
 
@@ -283,6 +297,7 @@
             fetchShop();
             fetchNotifications();
             fetchMyProductsAndOrders(user.email);
+            window.loadDraft(); // استرجاع المسودة
         } else {
             document.getElementById('auth-screen').style.display = 'flex';
             document.getElementById('main-app').style.display = 'none';
@@ -294,14 +309,21 @@
     window.signup = async () => { showLoader(); try { await createUserWithEmailAndPassword(auth, email.value, password.value); } catch(e) { Swal.fire('خطأ', 'البريد مستخدم أو كلمة المرور ضعيفة', 'error'); } hideLoader(); };
     window.logout = async () => { showLoader(); await signOut(auth); window.location.reload(); };
 
-    // --- الإشعارات ---
+    // --- نظام الإشعارات الذكي المطور (24 ساعة بعد الرؤية) ---
     window.toggleNotifications = () => {
         const modal = document.getElementById('notifications-modal');
-        if (modal.style.display === 'block') { modal.style.display = 'none'; } 
-        else {
+        if (modal.style.display === 'block') { 
+            modal.style.display = 'none'; 
+        } else {
             modal.style.display = 'block';
             document.getElementById('notif-badge').style.display = 'none';
-            localStorage.setItem('lastReadNotif', Date.now());
+            // تحديث وقت الرؤية لكل الإشعارات المعروضة
+            document.querySelectorAll('.notif-item').forEach(el => {
+                const nKey = el.getAttribute('data-key');
+                if(nKey && !localStorage.getItem(`seen_${nKey}`)) {
+                    localStorage.setItem(`seen_${nKey}`, Date.now());
+                }
+            });
         }
     };
 
@@ -311,35 +333,71 @@
             const badge = document.getElementById('notif-badge');
             const vals = snap.val();
             let unreadCount = 0;
-            const lastRead = localStorage.getItem('lastReadNotif') || 0;
 
             if(vals) {
-                const notifsArray = Object.keys(vals).map(k => vals[k]).sort((a,b) => b.timestamp - a.timestamp);
+                const notifsArray = Object.keys(vals).map(k => ({ key: k, ...vals[k] })).sort((a,b) => b.timestamp - a.timestamp);
                 notifsArray.forEach(n => {
-                    if (n.timestamp > lastRead) unreadCount++;
+                    // فلترة الإشعارات الخاصة: لو فيه إيميل مستهدف ومش هو إيميل المستخدم أو الأدمن، متظهروش
+                    if(n.targetEmail && n.targetEmail !== auth.currentUser.email && auth.currentUser.email !== ADMIN) return;
+
+                    // فلترة 24 ساعة بعد الرؤية
+                    let seenTime = localStorage.getItem(`seen_${n.key}`);
+                    if (seenTime && (Date.now() - parseInt(seenTime)) > 86400000) return; // عدى 24 ساعة ع الرؤية
+
+                    if (!seenTime) unreadCount++;
+
+                    let personalBadge = n.targetEmail ? '<span style="background:var(--gold); color:#000; padding:2px 5px; border-radius:5px; font-size:0.6rem; float:left;">خاص بك</span>' : '';
+                    
                     list.innerHTML += `
-                        <div class="notif-item glass" style="border-right: 3px solid ${n.timestamp > lastRead ? 'var(--gold)' : 'transparent'}">
+                        <div class="notif-item glass" data-key="${n.key}" style="border-right: 3px solid ${!seenTime ? 'var(--gold)' : 'transparent'}">
+                            ${personalBadge}
                             <h4>${n.title}</h4><p>${n.body}</p>
                         </div>`;
                 });
+                
                 if (unreadCount > 0) { badge.innerText = unreadCount; badge.style.display = 'block'; } 
                 else { badge.style.display = 'none'; }
             } else { list.innerHTML = '<p style="text-align:center; color:#888;">لا توجد إشعارات</p>'; badge.style.display = 'none'; }
         });
     }
 
-    // --- المتجر ---
+    // --- الميزة الذكية (المسودة التلقائية) ---
+    window.saveDraft = () => {
+        const draft = {
+            n: document.getElementById('p-name').value,
+            d: document.getElementById('p-desc').value,
+            p: document.getElementById('p-price').value,
+            ph: document.getElementById('p-phone').value
+        };
+        localStorage.setItem('homos_draft', JSON.stringify(draft));
+    };
+
+    window.loadDraft = () => {
+        let draft = localStorage.getItem('homos_draft');
+        if (draft) {
+            draft = JSON.parse(draft);
+            if(draft.n) document.getElementById('p-name').value = draft.n;
+            if(draft.d) document.getElementById('p-desc').value = draft.d;
+            if(draft.p) document.getElementById('p-price').value = draft.p;
+            if(draft.ph) document.getElementById('p-phone').value = draft.ph;
+        }
+    };
+
+    // --- إضافة منتج ---
     window.handleImg = (e) => { showLoader(); const r = new FileReader(); r.onload = () => { imgData = r.result; hideLoader(); }; r.readAsDataURL(e.target.files[0]); };
 
     window.sendToReview = async () => {
         const n = document.getElementById('p-name').value, p = document.getElementById('p-price').value, d = document.getElementById('p-desc').value, ph = document.getElementById('p-phone').value;
-        if(!n || !p || !imgData || !ph) return Swal.fire('تنبيه', 'أكمل كافة البيانات', 'warning');
+        if(!n || !p || !imgData || !ph) return Swal.fire('تنبيه', 'أكمل كافة البيانات يا بطل', 'warning');
         
         showLoader();
         await push(ref(db, 'pending'), { name: n, price: parseFloat(p), desc: d, phone: ph, img: imgData, owner: auth.currentUser.email, timestamp: Date.now() });
         hideLoader();
-        Swal.fire('تم الرفع!', 'منتجك الآن قيد المراجعة.', 'success');
-        document.getElementById('p-name').value = ''; document.getElementById('p-price').value = ''; document.getElementById('p-desc').value = ''; document.getElementById('p-phone').value = '';
+        Swal.fire('عاش!', 'منتجك طار للمراجعة وهينزل المتجر قريب.', 'success');
+        
+        // تفريغ المسودة بعد النجاح
+        localStorage.removeItem('homos_draft');
+        document.getElementById('p-name').value = ''; document.getElementById('p-price').value = ''; document.getElementById('p-desc').value = ''; 
     };
 
     function fetchShop() {
@@ -347,7 +405,7 @@
             allProducts = [];
             const val = s.val();
             if(val) { Object.keys(val).reverse().forEach(id => { allProducts.push({ id, ...val[id] }); }); }
-            window.filterShop(); // يتم استدعاء الفلترة لعرض المنتجات
+            window.filterShop(); 
             if(auth.currentUser && auth.currentUser.email === ADMIN) renderAdminShop();
         });
     }
@@ -367,38 +425,31 @@
                         <button class="btn btn-gold btn-sm" onclick="window.buyProduct('${i.name.replace(/'/g, "\\'")}', ${i.price})">شراء الآن</button>
                     </div>`;
             });
-        } else { list.innerHTML = '<p style="text-align:center; color:#666; grid-column: span 2;">لا توجد منتجات</p>'; }
+        } else { list.innerHTML = '<p style="text-align:center; color:#666; grid-column: span 2;">لا توجد منتجات حالياً</p>'; }
     }
 
-    // محرك البحث الذكي والترتيب
     window.filterShop = () => {
         let originalQuery = document.getElementById('smartSearch').value.toLowerCase();
         let query = originalQuery;
         
-        // تطبيق القاموس الذكي
         Object.keys(smartDictionary).forEach(arWord => {
             if (query.includes(arWord)) query = query.replace(arWord, smartDictionary[arWord]);
         });
 
         let filtered = allProducts.filter(p => {
-            const pName = p.name.toLowerCase();
-            const pDesc = (p.desc || "").toLowerCase();
-            return pName.includes(query) || pDesc.includes(query) || pName.includes(originalQuery) || pDesc.includes(originalQuery) || (p.hotDeal && 'لقطة'.includes(originalQuery));
+            const pName = p.name.toLowerCase(); const pDesc = (p.desc || "").toLowerCase();
+            return pName.includes(query) || pDesc.includes(query) || pName.includes(originalQuery) || (p.hotDeal && 'لقطة'.includes(originalQuery));
         });
 
-        // ترتيب المنتجات
         const sortVal = document.getElementById('sort-price').value;
         if (sortVal === 'low') { filtered.sort((a, b) => a.price - b.price); }
         else if (sortVal === 'high') { filtered.sort((a, b) => b.price - a.price); }
-        // default is 'latest' which is already handled by reversing the array in fetchShop
 
         renderShop(filtered);
     };
 
-    // --- الشراء والإحالة (كما هي في السابق) ---
     window.buyProduct = async (name, price) => { 
         let currentWallet = currentUserData.wallet || 0;
-        const usedPromos = currentUserData.usedPromos || {};
         
         const { value: formValues } = await Swal.fire({
             title: `إتمام الشراء`,
@@ -406,24 +457,14 @@
                 <h3 style="color:#000;">المطلوب: ${price} ج.م</h3>
                 <p style="font-size:0.85rem; color:#444;">رصيد محفظتك: ${currentWallet} ج.م</p>
                 <label style="color:#000;"><input type="checkbox" id="use-wallet" ${currentWallet > 0 ? '' : 'disabled'}> خصم من المحفظة</label>
-                <hr style="margin:15px 0;">
-                <input id="swal-promo" class="swal2-input" placeholder="كود الخصم" style="text-transform: uppercase;">
             `,
             focusConfirm: false, showCancelButton: true, confirmButtonText: 'تأكيد الطلب', cancelButtonText: 'إلغاء',
-            preConfirm: () => { return { promo: document.getElementById('swal-promo').value.toUpperCase(), useWallet: document.getElementById('use-wallet').checked }; }
+            preConfirm: () => { return { useWallet: document.getElementById('use-wallet').checked }; }
         });
 
         if (formValues) {
             showLoader();
             let finalPrice = price; let msgDetails = `%0A🛍️ *طلب شراء:* ${name}%0A💵 *السعر:* ${price} ج.م`; let updatesToUser = {};
-            if(formValues.promo) {
-                if(usedPromos[formValues.promo]) { hideLoader(); return Swal.fire('عذراً', 'لقد استخدمت الكود سابقاً', 'error'); }
-                const promoSnap = await get(ref(db, `promos/${formValues.promo}`));
-                if(promoSnap.exists()) {
-                    const discountAmount = finalPrice * (promoSnap.val().discount / 100);
-                    finalPrice -= discountAmount; msgDetails += `%0A🎟️ *خصم:* (-${discountAmount} ج.م)`; updatesToUser[`usedPromos/${formValues.promo}`] = true;
-                } else { hideLoader(); return Swal.fire('عذراً', 'كود الخصم غير صحيح', 'error'); }
-            }
             let walletDeducted = 0;
             if(formValues.useWallet && currentWallet > 0) {
                 walletDeducted = Math.min(finalPrice, currentWallet); 
@@ -435,48 +476,58 @@
             await push(ref(db, 'orders'), { uid: auth.currentUser.uid, userEmail: auth.currentUser.email, productName: name, finalPrice: finalPrice, status: 'جاري التجهيز ⏳', timestamp: Date.now() });
             if(Object.keys(updatesToUser).length > 0) { await update(ref(db, `users/${auth.currentUser.uid}`), updatesToUser); }
             hideLoader();
-            await Swal.fire('تم تأكيد الطلب!', `يمكنك متابعة حالة الطلب من حسابك.`, 'success');
+            await Swal.fire('تم تأكيد الطلب!', `هنحولك دلوقتي لواتساب الإدارة لتأكيد الاستلام.`, 'success');
             window.open(`https://wa.me/201016553764?text=${msgDetails}`, '_blank');
         }
     };
     
     window.shareProduct = (id, name, price) => {
         const shareUrl = `${window.location.origin}${window.location.pathname}?view=${id}`;
-        const text = `شوف المنتج ده "${name}" بسعر ${price} ج.م على HOMOS!`;
+        const text = `شوف "${name}" بسعر ${price} ج.م على HOMOS!`;
         if (navigator.share) { navigator.share({ title: 'HOMOS', text: text, url: shareUrl }); } 
         else { navigator.clipboard.writeText(text + " " + shareUrl); Swal.fire('تم النسخ', '', 'success'); }
     };
     
     window.copyRef = () => { navigator.clipboard.writeText(document.getElementById('my-ref-code').innerText); Swal.fire({icon: 'success', title: 'تم النسخ!', timer: 1500}); };
     
-    // --- التعديل هنا: دالة الإحالة الجديدة بشرط الـ PWA ---
+    // --- حماية الإحالة الذكية (Device Fingerprint) ---
     window.applyRef = async () => {
-        const isPWA = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
-        
-        if (!isPWA) {
+        // فحص البصمة لمنع تكرار الإحالة من نفس التليفون
+        if (localStorage.getItem('device_referral_used') === 'true') {
             return Swal.fire({
-                title: 'تطبيق HOMOS مطلوب!',
-                text: 'عذراً! لكي يعمل كود الإحالة وتربح، يجب عليك تثبيت تطبيق HOMOS على شاشتك الرئيسية وفتحه من هناك.',
+                title: 'متتذكاش علينا يسطا 😉',
+                text: 'الجهاز ده تم استخدامه لإدخال كود إحالة قبل كده، نظام الحماية كشفك!',
                 icon: 'warning',
-                confirmButtonText: 'حسناً، فهمت',
-                confirmButtonColor: '#FFD700'
+                confirmButtonColor: '#ff4444'
             });
+        }
+
+        const isPWA = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+        if (!isPWA) {
+            return Swal.fire({ title: 'تطبيق HOMOS مطلوب!', text: 'عذراً! لكي يعمل كود الإحالة وتربح، يجب عليك تثبيت تطبيق HOMOS على شاشتك الرئيسية وفتحه من هناك.', icon: 'warning', confirmButtonColor: '#FFD700' });
         }
 
         const friendCode = document.getElementById('friend-ref').value.toUpperCase().trim();
         if(!friendCode) return Swal.fire('خطأ', 'أدخل الكود أولاً', 'error');
-        if(currentUserData.usedRef) return Swal.fire('عذراً', 'استخدمت كود إحالة سابقاً', 'warning');
+        if(currentUserData.usedRef) return Swal.fire('عذراً', 'استخدمت كود إحالة سابقاً من هذا الحساب', 'warning');
         if(friendCode === currentUserData.refCode) return Swal.fire('خطأ', 'لا يمكنك استخدام كودك الخاص', 'error');
+        
         showLoader();
         const codeSnap = await get(ref(db, `refCodes/${friendCode}`));
         if(codeSnap.exists()) {
-            const friendUid = codeSnap.val(); const friendWalletSnap = await get(ref(db, `users/${friendUid}/wallet`));
+            const friendUid = codeSnap.val(); 
+            const friendWalletSnap = await get(ref(db, `users/${friendUid}/wallet`));
             await update(ref(db, `users/${friendUid}`), { wallet: (friendWalletSnap.val() || 0) + 10 });
             await update(ref(db, `users/${auth.currentUser.uid}`), { wallet: (currentUserData.wallet || 0) + 5, usedRef: true });
-            hideLoader(); Swal.fire('مبروك!', 'تم تفعيل الكود وربحت 5 ج.م!', 'success'); document.getElementById('friend-ref').value = '';
+            
+            // تسجيل البصمة على الجهاز بعد النجاح
+            localStorage.setItem('device_referral_used', 'true');
+            
+            hideLoader(); 
+            Swal.fire('مبروك!', 'تم تفعيل الكود وربحت 5 ج.م!', 'success'); 
+            document.getElementById('friend-ref').value = '';
         } else { hideLoader(); Swal.fire('خطأ', 'كود الإحالة غير صحيح', 'error'); }
     };
-    // --- نهاية التعديل ---
 
     // --- حسابي (تتبع الطلبات) ---
     function fetchMyProductsAndOrders(userEmail) {
@@ -511,22 +562,51 @@
         updateProductsUI();
     }
 
-    // --- لوحة المدير (الإصلاحات الكبرى هنا) ---
+    // --- لوحة المدير المطورة ---
     window.sendCustomNotif = async () => {
         const title = document.getElementById('admin-notif-title').value;
         const body = document.getElementById('admin-notif-body').value;
+        const targetEmail = document.getElementById('admin-notif-target').value.trim(); // جديد: إيميل محدد
+        
         if(!title || !body) return Swal.fire('خطأ', 'اكتب العنوان والتفاصيل', 'error');
         
         showLoader();
         try {
-            await push(ref(db, 'notifications'), { title: title, body: body, timestamp: Date.now() });
-            Swal.fire('تم الإرسال 🚀', 'تم إرسال الإشعار للجميع', 'success');
-            document.getElementById('admin-notif-title').value = ''; document.getElementById('admin-notif-body').value = '';
+            let notifData = { title: title, body: body, timestamp: Date.now() };
+            if(targetEmail !== "") notifData.targetEmail = targetEmail; // إضافة الإيميل المستهدف
+
+            await push(ref(db, 'notifications'), notifData);
+            Swal.fire('تم الإرسال 🚀', targetEmail ? `تم الإرسال لـ ${targetEmail} فقط` : 'تم إرسال الإشعار للجميع', 'success');
+            document.getElementById('admin-notif-title').value = ''; document.getElementById('admin-notif-body').value = ''; document.getElementById('admin-notif-target').value = '';
         } catch(e) { Swal.fire('خطأ', 'فشل الإرسال', 'error'); }
         hideLoader();
     };
+
+    window.adminSendToUser = (email) => {
+        document.getElementById('admin-notif-target').value = email;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        document.getElementById('admin-notif-title').focus();
+    };
     
     function fetchAdmin() {
+        // جلب المستخدمين (ميزة جديدة)
+        onValue(ref(db, 'users'), (s) => {
+            const list = document.getElementById('admin-users-list'); list.innerHTML = '';
+            if(s.val()) {
+                Object.keys(s.val()).forEach(uid => {
+                    const u = s.val()[uid];
+                    list.innerHTML += `
+                        <div class="admin-user-card">
+                            <div style="font-size: 0.85rem;">
+                                <b style="color:var(--gold)">${u.email}</b><br>
+                                الرصيد: ${u.wallet || 0} ج.م | الكود: ${u.refCode}
+                            </div>
+                            <button class="btn btn-glass" style="padding: 5px 10px; width: auto; font-size: 0.75rem; border-color:#00f2fe; color:#00f2fe;" onclick="window.adminSendToUser('${u.email}')">إشعار</button>
+                        </div>`;
+                });
+            }
+        });
+
         // مراجعة المنتجات
         onValue(ref(db, 'pending'), (s) => {
             const list = document.getElementById('admin-requests'); list.innerHTML = '';
@@ -554,17 +634,16 @@
                     const o = s.val()[id];
                     list.innerHTML += `
                         <div class="glass request-item">
-                            <p><b>مشتري:</b> ${o.userEmail} <br> <b>منتج:</b> ${o.productName} (${o.finalPrice} ج.م)</p>
-                            <p style="font-size:0.8rem; color:var(--gold);">الحالة: ${o.status}</p>
-                            <select id="status-${id}" style="padding:5px; margin-top:5px; width:100%;">
-                                <option value="جاري التجهيز ⏳">جاري التجهيز</option>
-                                <option value="جاري التوصيل 🚚">جاري التوصيل</option>
-                                <option value="تم التسليم ✅">تم التسليم</option>
+                            <p><b>مشتري:</b> ${o.userEmail} <br> <b>منتج:</b> ${o.productName} (<span style="color:var(--gold)">${o.finalPrice} ج.م</span>)</p>
+                            <select id="status-${id}" style="padding:8px; margin-top:5px; width:100%; font-size:0.9rem;">
+                                <option value="جاري التجهيز ⏳" ${o.status.includes('التجهيز') ? 'selected' : ''}>جاري التجهيز ⏳</option>
+                                <option value="جاري التوصيل 🚚" ${o.status.includes('التوصيل') ? 'selected' : ''}>جاري التوصيل 🚚</option>
+                                <option value="تم التسليم ✅" ${o.status.includes('التسليم') ? 'selected' : ''}>تم التسليم ✅</option>
                             </select>
-                            <button class="btn btn-glass" style="padding:8px; margin-top:5px;" onclick="window.updateOrderStatus('${id}')">تحديث الحالة</button>
+                            <button class="btn btn-glass" style="padding:8px; margin-top:10px; border-color:var(--gold);" onclick="window.updateOrderStatus('${id}')">تحديث الحالة</button>
                         </div>`;
                 });
-            } else { list.innerHTML = '<p style="color:#888;">لا توجد طلبات شراء</p>'; }
+            } else { list.innerHTML = '<p style="color:#888; text-align:center;">لا توجد طلبات شراء</p>'; }
         });
     }
 
