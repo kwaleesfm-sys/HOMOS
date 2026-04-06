@@ -37,7 +37,7 @@ self.addEventListener('fetch', (event) => {
       return response || fetch(event.request);
     }).catch(() => {
         // إذا فشل الإنترنت ولم يجد الملف في الكاش (صفحة خطأ اختيارية)
-        return caches.match('./khroga.html');
+        return caches.match('./Homos.html');
     })
   );
 });
