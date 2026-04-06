@@ -2,7 +2,7 @@ const CACHE_NAME = 'homos-platform-v1';
 // أضف هنا جميع الملفات التي تريدها أن تعمل بدون إنترنت
 const ASSETS_TO_CACHE = [
   './',
-  './khroga.html',
+  './Homos.html',
   './manifest.json',
   './icon-512.PNG',
   // أضف هنا أي ملفات CSS أو JS أو صور أخرى تستخدمها
