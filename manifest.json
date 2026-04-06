@@ -2,7 +2,7 @@
   "name": "HOMOS PLATFORM",
   "short_name": "HOMOS",
   "description": "المنصة الملكية للتجارة والاستثمار",
-  "start_url": "./khroga.html",
+  "start_url": "./Homos.html",
   "display": "standalone",
   "background_color": "#020202",
   "theme_color": "#FFD700",
